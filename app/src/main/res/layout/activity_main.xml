@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity"
+    >
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@color/base_white"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+
+            <ImageView
+                android:id="@+id/ivBold"
+                android:layout_width="@dimen/style_button_size"
+                android:layout_height="@dimen/style_button_size"
+                android:padding="7dp"
+                android:src="@mipmap/icon_bold_normal"
+                />
+
+            <ImageView
+                android:id="@+id/ivItalic"
+                android:layout_width="@dimen/style_button_size"
+                android:layout_height="@dimen/style_button_size"
+                android:padding="7dp"
+                android:src="@mipmap/icon_italic_normal"
+                />
+
+            <ImageView
+                android:id="@+id/ivStrikeThrough"
+                android:layout_width="@dimen/style_button_size"
+                android:layout_height="@dimen/style_button_size"
+                android:padding="7dp"
+                android:src="@mipmap/icon_strikethrough_normal"
+                />
+
+            <ImageView
+                android:id="@+id/ivUnderline"
+                android:layout_width="@dimen/style_button_size"
+                android:layout_height="@dimen/style_button_size"
+                android:padding="7dp"
+                android:src="@mipmap/icon_underline_normal"
+                />
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+    <com.yuruiyin.richeditor.RichEditText
+        android:id="@+id/richEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="#ffffff"
+        android:gravity="top|left"
+        android:hint="请输入..."
+        android:inputType="textMultiLine"
+        android:maxLength="20000"
+        android:minHeight="350dp"
+        android:paddingBottom="70dp"
+        android:paddingLeft="14dp"
+        android:paddingRight="14dp"
+        android:paddingTop="23dp"
+        android:textColor="#171717"
+        android:textColorHint="#aaaaaa"
+        android:textSize="16dp"
+        />
+
+</LinearLayout>
