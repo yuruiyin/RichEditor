@@ -340,7 +340,7 @@ public class RichUtils {
      */
     private void handleStyleButtonsStatus() {
         Editable editable = mRichEditText.getEditableText();
-        int cursorPos = mRichEditText.getSelectionStart();
+        int cursorPos = mRichEditText.getSelectionEnd();
         String content = mRichEditText.getText().toString();
 
         // 先将所有按钮置灰
