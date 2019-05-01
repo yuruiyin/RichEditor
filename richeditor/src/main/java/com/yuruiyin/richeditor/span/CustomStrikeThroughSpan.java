@@ -1,7 +1,6 @@
 package com.yuruiyin.richeditor.span;
 
-import android.graphics.Typeface;
-import android.text.style.StyleSpan;
+import android.text.style.StrikethroughSpan;
 
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
 import com.yuruiyin.richeditor.model.IInlineSpan;
@@ -11,15 +10,14 @@ import com.yuruiyin.richeditor.model.IInlineSpan;
  * Description:
  *
  * @author yuruiyin
- * @version 2019-04-29
+ * @version 2019-04-30
  */
-public class BoldStyleSpan extends StyleSpan implements IInlineSpan {
+public class CustomStrikeThroughSpan extends StrikethroughSpan implements IInlineSpan {
 
     private String type;
 
-    public BoldStyleSpan() {
-        super(Typeface.BOLD);
-        type = RichTypeEnum.BOLD;
+    public CustomStrikeThroughSpan() {
+        type = RichTypeEnum.STRIKE_THROUGH;
     }
 
     @Override

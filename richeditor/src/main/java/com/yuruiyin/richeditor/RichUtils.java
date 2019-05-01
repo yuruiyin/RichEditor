@@ -4,15 +4,14 @@ import android.app.Activity;
 import android.text.Editable;
 import android.text.ParcelableSpan;
 import android.text.Spanned;
-import android.text.style.StrikethroughSpan;
-import android.text.style.UnderlineSpan;
 import android.view.KeyEvent;
 import android.widget.ImageView;
 import com.yuruiyin.richeditor.enumtype.BlockTypeEnum;
-import com.yuruiyin.richeditor.enumtype.InlineStyleEnum;
-import com.yuruiyin.richeditor.model.InlineStyleVm;
-import com.yuruiyin.richeditor.span.BoldStyleSpan;
-import com.yuruiyin.richeditor.span.ItalicStyleSpan;
+import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
+import com.yuruiyin.richeditor.model.IBlockSpan;
+import com.yuruiyin.richeditor.model.IInlineSpan;
+import com.yuruiyin.richeditor.model.StyleBtnVm;
+import com.yuruiyin.richeditor.span.*;
 import com.yuruiyin.richeditor.utils.SoftKeyboardUtil;
 
 import java.util.HashMap;
@@ -34,7 +33,7 @@ public class RichUtils {
     private Activity mActivity;
 
     // 标记支持哪些行内样式
-    private Map<String, InlineStyleVm> mInlineTypeToVmMap = new HashMap<>();
+    private Map<String, StyleBtnVm> mRichTypeToVmMap = new HashMap<>();
 
     public RichUtils(Activity activity, RichEditText richEditText) {
         mActivity = activity;
@@ -42,6 +41,8 @@ public class RichUtils {
     }
 
     public void init() {
+        // 将当前实例传给RichEditText保存一份，未来需要用到
+        mRichEditText.setRichUtils(this);
         RichTextWatcher mTextWatcher = new RichTextWatcher(mRichEditText);
         mRichEditText.addTextWatcher(mTextWatcher);
 
@@ -68,21 +69,55 @@ public class RichUtils {
         imageView.setImageResource(resId);
     }
 
-    public void initInlineStyle(InlineStyleVm inlineStyleVm) {
-        String inlineType = inlineStyleVm.getType();
-        mInlineTypeToVmMap.put(inlineType, inlineStyleVm);
-        inlineStyleVm.getIvButton().setOnClickListener(v -> toggleInlineStyle(inlineType));
+    /**
+     * 判断是否行内样式类型
+     */
+    private boolean isInlineType(@RichTypeEnum String type) {
+        switch (type) {
+            case RichTypeEnum.HEADLINE:
+            case RichTypeEnum.BLOCK_QUOTE:
+                return false;
+        }
+
+        return true;
     }
 
-    private ParcelableSpan getInlineStyleSpan(Class spanClazz) {
+    /**
+     * 初始化样式按钮（如注册按钮监听器）
+     *
+     * @param styleBtnVm 样式实体
+     */
+    public void initStyleButton(StyleBtnVm styleBtnVm) {
+        String type = styleBtnVm.getType();
+        styleBtnVm.setIsInlineType(isInlineType(type));
+        mRichTypeToVmMap.put(type, styleBtnVm);
+        styleBtnVm.getIvButton().setOnClickListener(v -> {
+            if (mRichEditText.isFocused()) {
+                // 若未聚焦，则不响应点击事件
+                toggleStyle(type);
+            }
+        });
+    }
+
+    private IBlockSpan getBlockSpan(Class spanClazz, String content) {
+        if (HeadlineSpan.class == spanClazz) {
+            return new HeadlineSpan(mActivity, content);
+        } else if (CustomQuoteSpan.class == spanClazz) {
+            return new CustomQuoteSpan(mActivity, content);
+        }
+
+        return null;
+    }
+
+    private IInlineSpan getInlineStyleSpan(Class spanClazz) {
         if (BoldStyleSpan.class == spanClazz) {
             return new BoldStyleSpan();
         } else if (ItalicStyleSpan.class == spanClazz) {
             return new ItalicStyleSpan();
-        } else if (StrikethroughSpan.class == spanClazz) {
-            return new StrikethroughSpan();
-        } else if (UnderlineSpan.class == spanClazz) {
-            return new UnderlineSpan();
+        } else if (CustomStrikeThroughSpan.class == spanClazz) {
+            return new CustomStrikeThroughSpan();
+        } else if (CustomUnderlineSpan.class == spanClazz) {
+            return new CustomUnderlineSpan();
         }
 
         return null;
@@ -98,25 +133,25 @@ public class RichUtils {
         Editable editable = mRichEditText.getEditableText();
         int start = mRichEditText.getSelectionStart();
         int end = mRichEditText.getSelectionEnd();
-        ParcelableSpan[] parcelableSpans = (ParcelableSpan[]) editable.getSpans(start, end, spanClazz);
+        IInlineSpan[] inlineSpans = (IInlineSpan[]) editable.getSpans(start, end, spanClazz);
 
-        if (parcelableSpans.length <= 0) {
+        if (inlineSpans.length <= 0) {
             return;
         }
 
-        if (parcelableSpans.length == 1) {
-            ParcelableSpan singleSpan = parcelableSpans[0];
+        if (inlineSpans.length == 1) {
+            IInlineSpan singleSpan = inlineSpans[0];
             int singleSpanStart = editable.getSpanStart(singleSpan);
             int singleSpanEnd = editable.getSpanEnd(singleSpan);
             if (singleSpanStart < start) {
-                ParcelableSpan wantAddSpan = getInlineStyleSpan(spanClazz);
+                IInlineSpan wantAddSpan = getInlineStyleSpan(spanClazz);
                 if (wantAddSpan != null) {
                     editable.setSpan(wantAddSpan, singleSpanStart, start, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }
 
             if (singleSpanEnd > end) {
-                ParcelableSpan wantAddSpan = getInlineStyleSpan(spanClazz);
+                IInlineSpan wantAddSpan = getInlineStyleSpan(spanClazz);
                 if (wantAddSpan != null) {
                     editable.setSpan(wantAddSpan, end, singleSpanEnd, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
                 }
@@ -125,12 +160,12 @@ public class RichUtils {
             return;
         }
 
-        ParcelableSpan firstSpan = parcelableSpans[0];
-        ParcelableSpan lastSpan = parcelableSpans[parcelableSpans.length - 1];
+        IInlineSpan firstSpan = inlineSpans[0];
+        IInlineSpan lastSpan = inlineSpans[inlineSpans.length - 1];
 
         int firstSpanStart = editable.getSpanStart(firstSpan);
         if (firstSpanStart < start) {
-            ParcelableSpan wantAddSpan = getInlineStyleSpan(spanClazz);
+            IInlineSpan wantAddSpan = getInlineStyleSpan(spanClazz);
             if (wantAddSpan != null) {
                 editable.setSpan(wantAddSpan, firstSpanStart, start, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
@@ -138,7 +173,7 @@ public class RichUtils {
 
         int lastSpanEnd = editable.getSpanEnd(lastSpan);
         if (lastSpanEnd > end) {
-            ParcelableSpan wantAddSpan = getInlineStyleSpan(spanClazz);
+            IInlineSpan wantAddSpan = getInlineStyleSpan(spanClazz);
             if (wantAddSpan != null) {
                 editable.setSpan(wantAddSpan, end, lastSpanEnd, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
             }
@@ -157,9 +192,9 @@ public class RichUtils {
     /**
      * 获取合并后的span flag
      *
-     * @param mergedLeftSpanFlag
-     * @param mergedRightSpanFlag
-     * @return
+     * @param mergedLeftSpanFlag  被合并的左侧span flag
+     * @param mergedRightSpanFlag 被合并的右侧span flag
+     * @return 合并后的flag
      */
     private int getMergeSpanFlag(int mergedLeftSpanFlag, int mergedRightSpanFlag) {
         boolean isStartInclusive = false;  // 是否包括左端点
@@ -204,12 +239,12 @@ public class RichUtils {
         }
 
         if (leftPos > 0) {
-            ParcelableSpan[] leftSpans = (ParcelableSpan[]) editable.getSpans(leftPos, leftPos, spanClazz);
+            IInlineSpan[] leftSpans = (IInlineSpan[]) editable.getSpans(leftPos, leftPos, spanClazz);
             if (leftSpans.length >= 2) {
-                ParcelableSpan leftSpan = null;
+                IInlineSpan leftSpan = null;
                 int resSpanStart = 0;
                 int resSpanEnd = rightPos;
-                for (ParcelableSpan span : leftSpans) {
+                for (IInlineSpan span : leftSpans) {
                     if (editable.getSpanStart(span) < leftPos) {
                         resSpanStart = editable.getSpanStart(span);
                         leftSpan = span;
@@ -219,7 +254,7 @@ public class RichUtils {
                 if (leftSpan != null) {
                     int leftSpanFlags = editable.getSpanFlags(leftSpan);
                     int rightSpanFlags = Spanned.SPAN_INCLUSIVE_INCLUSIVE;
-                    for (ParcelableSpan span : leftSpans) {
+                    for (IInlineSpan span : leftSpans) {
                         if (editable.getSpanStart(span) < leftPos) {
                             editable.removeSpan(span);
                         }
@@ -228,20 +263,20 @@ public class RichUtils {
                             editable.removeSpan(span);
                         }
                     }
-                    ParcelableSpan wantAddSpan = getInlineStyleSpan(spanClazz);
+                    IInlineSpan wantAddSpan = getInlineStyleSpan(spanClazz);
                     editable.setSpan(wantAddSpan, resSpanStart, resSpanEnd, getMergeSpanFlag(leftSpanFlags, rightSpanFlags));
                 }
             }
         }
 
         if (rightPos < editable.length()) {
-            ParcelableSpan[] rightSpans = (ParcelableSpan[]) editable.getSpans(rightPos, rightPos, spanClazz);
+            IInlineSpan[] rightSpans = (IInlineSpan[]) editable.getSpans(rightPos, rightPos, spanClazz);
             if (rightSpans.length >= 2) {
-                ParcelableSpan curRightSpan = null;
-                ParcelableSpan curLeftSpan = null;
+                IInlineSpan curRightSpan = null;
+                IInlineSpan curLeftSpan = null;
                 int resSpanStart = 0;
                 int resSpanEnd = 0;
-                for (ParcelableSpan span : rightSpans) {
+                for (IInlineSpan span : rightSpans) {
                     if (editable.getSpanEnd(span) == rightPos) {
                         curLeftSpan = span;
                         resSpanStart = editable.getSpanStart(span);
@@ -254,10 +289,10 @@ public class RichUtils {
                 if (curLeftSpan != null && curRightSpan != null) {
                     int leftSpanFlags = editable.getSpanFlags(curLeftSpan);
                     int rightSpanFlags = editable.getSpanFlags(curRightSpan);
-                    for (ParcelableSpan span : rightSpans) {
+                    for (IInlineSpan span : rightSpans) {
                         editable.removeSpan(span);
                     }
-                    ParcelableSpan wantAddSpan = getInlineStyleSpan(spanClazz);
+                    IInlineSpan wantAddSpan = getInlineStyleSpan(spanClazz);
                     editable.setSpan(wantAddSpan, resSpanStart, resSpanEnd, getMergeSpanFlag(leftSpanFlags, rightSpanFlags));
                 }
             }
@@ -266,60 +301,87 @@ public class RichUtils {
     }
 
     /**
-     * 通过行内样式类型获取对应Class
-     *
-     * @param type
-     * @return
+     * 通过样式类型获取对应Class
      */
-    private Class getInlineSpanClassFromType(@InlineStyleEnum String type) {
+    private Class getSpanClassFromType(@RichTypeEnum String type) {
         switch (type) {
-            case InlineStyleEnum.BOLD:
+            case RichTypeEnum.BOLD:
                 return BoldStyleSpan.class;
-            case InlineStyleEnum.ITALIC:
+            case RichTypeEnum.ITALIC:
                 return ItalicStyleSpan.class;
-            case InlineStyleEnum.STRIKE_THROUGH:
-                return StrikethroughSpan.class;
-            case InlineStyleEnum.UNDERLINE:
-                return UnderlineSpan.class;
+            case RichTypeEnum.STRIKE_THROUGH:
+                return CustomStrikeThroughSpan.class;
+            case RichTypeEnum.UNDERLINE:
+                return CustomUnderlineSpan.class;
+            case RichTypeEnum.HEADLINE:
+                return HeadlineSpan.class;
+            case RichTypeEnum.BLOCK_QUOTE:
+                return CustomQuoteSpan.class;
         }
 
         return null;
     }
 
     /**
+     * 判断是否为文本block（包括headlineBlock）
+     *
+     * @return true-光标在文本block中，false-光标不在文本block中
+     */
+    private boolean isTextBlock() {
+        int cursorPos = mRichEditText.getSelectionStart();
+        if (cursorPos == 0) {
+            return true;
+        }
+        Editable editable = mRichEditText.getEditableText();
+        // 由于ImageSpan包括行内ImageSpan（@xxx等）和段落ImageSpan（图片、视频封面、自定义布局等）
+        BlockImageSpan[] imageSpans = editable.getSpans(cursorPos - 1, cursorPos, BlockImageSpan.class);
+        return imageSpans.length <= 0;
+    }
+
+    /**
      * 处理加粗
      * 修改选中区域的粗体样式
      */
-    private void toggleInlineStyle(@InlineStyleEnum String type) {
-        InlineStyleVm inlineStyleVm = mInlineTypeToVmMap.get(type);
-        if (inlineStyleVm == null) {
+    private void toggleStyle(@BlockTypeEnum String type) {
+        if (!isTextBlock()) {
             return;
         }
 
-        Class spanClazz = getInlineSpanClassFromType(type);
+        StyleBtnVm styleBtnVm = mRichTypeToVmMap.get(type);
+        if (styleBtnVm == null) {
+            return;
+        }
+
+        Class spanClazz = getSpanClassFromType(type);
         if (spanClazz == null) {
             return;
         }
 
-        inlineStyleVm.setLight(!inlineStyleVm.isLight()); // 粗体状态取反
-        changeStyleBtnImage(inlineStyleVm.getIvButton(),
-                inlineStyleVm.isLight() ? inlineStyleVm.getLightResId() : inlineStyleVm.getNormalResId());
+        styleBtnVm.setLight(!styleBtnVm.isLight()); // 状态取反
+        changeStyleBtnImage(styleBtnVm.getIvButton(),
+                styleBtnVm.isLight() ? styleBtnVm.getLightResId() : styleBtnVm.getNormalResId());
+
+        if (!styleBtnVm.isInlineType()) {
+            // 段落样式（标题、引用）
+            handleBlockType(styleBtnVm);
+            return;
+        }
 
         Editable editable = mRichEditText.getEditableText();
         int start = mRichEditText.getSelectionStart();
         int end = mRichEditText.getSelectionEnd();
 
-        ParcelableSpan[] parcelableSpans = (ParcelableSpan[]) editable.getSpans(start, end, spanClazz);
+        IInlineSpan[] inlineSpans = (IInlineSpan[]) editable.getSpans(start, end, spanClazz);
 
         // 先将两端的span进行切割
         handleInlineStyleBoundary(spanClazz);
 
         // 可能存在多个分段的span，需要先都移除
-        for (ParcelableSpan parcelableSpan : parcelableSpans) {
-            editable.removeSpan(parcelableSpan);
+        for (IInlineSpan span : inlineSpans) {
+            editable.removeSpan(span);
         }
 
-        if (inlineStyleVm.isLight()) {
+        if (styleBtnVm.isLight()) {
             int flags = start == end ? Spanned.SPAN_INCLUSIVE_INCLUSIVE : Spanned.SPAN_EXCLUSIVE_INCLUSIVE;
             editable.setSpan(getInlineStyleSpan(spanClazz), start, end, flags);
             mergeContinuousInlineSpan(start, end, spanClazz);
@@ -327,69 +389,225 @@ public class RichUtils {
     }
 
     /**
-     * 切换段内样式
+     * 获取光标位置的block的起始位置和终止位置
      *
-     * @param type 具体段内样式（如段落，引用等）
+     * @return block的起始位置和终止位置的二维int数组
      */
-    public void toggleBlockType(@BlockTypeEnum String type) {
-        // TODO
+    private int[] getCursorPosBlockBoundary() {
+        int[] blockBoundaryArr = new int[2];
+        int cursorPos = mRichEditText.getSelectionStart();
+        String content = mRichEditText.getEditableText().toString();
+        int size = content.length();
+        for (int i = cursorPos - 1; i >= 0; i--) {
+            if (i >= size) {
+                continue;
+            }
+            if (content.charAt(i) == '\n') {
+                blockBoundaryArr[0] = i + 1;
+                break;
+            }
+            if (i == 0) {
+                blockBoundaryArr[0] = 0;
+                break;
+            }
+        }
+        blockBoundaryArr[1] = cursorPos; //若当前光标是最后一个位置
+        for (int i = cursorPos; i < size; i++) {
+            if (i == size - 1) {
+                if (content.charAt(i) != '\n') {
+                    blockBoundaryArr[1] = i + 1;
+                } else {
+                    blockBoundaryArr[1] = i;
+                }
+                break;
+            }
+            if (content.charAt(i) == '\n') {
+                blockBoundaryArr[1] = i;
+                break;
+            }
+        }
+        return blockBoundaryArr;
+    }
+
+    /**
+     * 删除block span
+     *
+     * @param spanClazz 当前执行的block span class
+     * @param start     起始位置
+     * @param end       终止位置
+     */
+    private void removeBlockSpan(Class spanClazz, int start, int end) {
+        Editable editable = mRichEditText.getEditableText();
+        IBlockSpan[] blockSpans;
+        if (spanClazz == null) {
+            blockSpans = editable.getSpans(start, end, IBlockSpan.class);
+        } else {
+            blockSpans = (IBlockSpan[]) editable.getSpans(start, end, spanClazz);
+        }
+        for (IBlockSpan blockSpan : blockSpans) {
+            editable.removeSpan(blockSpan);
+        }
+    }
+
+    /**
+     * 当点击任意一个段落类型的按钮时，置灰其他段落类型的按钮，同时修改数据
+     *
+     * @param curBlockType 当前点击的段落类型
+     */
+    private void setOtherBlockStyleBtnDisable(@RichTypeEnum String curBlockType) {
+        for (StyleBtnVm styleBtnVm : mRichTypeToVmMap.values()) {
+            if (!styleBtnVm.isInlineType() && !styleBtnVm.getType().equals(curBlockType)) {
+                styleBtnVm.setLight(false);
+                changeStyleBtnImage(styleBtnVm.getIvButton(), styleBtnVm.getNormalResId());
+            }
+        }
+    }
+
+    private int getBlockSpanFlag(@RichTypeEnum String type) {
+        if (RichTypeEnum.BLOCK_QUOTE.equals(type)) {
+            return Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
+        }
+
+        return Spanned.SPAN_INCLUSIVE_INCLUSIVE;
+    }
+
+    private int getCursorHeight(@RichTypeEnum String type) {
+        switch (type) {
+            case RichTypeEnum.HEADLINE:
+                return (int) (mActivity.getResources().getDimension(R.dimen.rich_editor_headline_text_size) * 1.25);
+            case RichTypeEnum.BLOCK_QUOTE:
+                return (int) (mActivity.getResources().getDimension(R.dimen.rich_editor_quote_text_size) * 1.25);
+        }
+
+        return (int) (mRichEditText.getTextSize() * 1.25);
+    }
+
+    /**
+     * 重置光标高度为默认的高度
+     */
+    private void resetCursorHeight() {
+        mRichEditText.setCursorHeight((int) (mRichEditText.getTextSize() * 1.25));
+    }
+
+    /**
+     * 处理段内样式（标题、引用等）
+     *
+     * @param styleBtnVm 样式按钮实体
+     */
+    private void handleBlockType(StyleBtnVm styleBtnVm) {
+        String blockType = styleBtnVm.getType();
+        int[] curBlockBoundary = getCursorPosBlockBoundary();
+        int start = curBlockBoundary[0];
+        int end = curBlockBoundary[1];
+        Editable editable = mRichEditText.getEditableText();
+        String content = editable.toString();
+        Class spanClazz = getSpanClassFromType(blockType);
+        if (styleBtnVm.isLight()) {
+            removeBlockSpan(null, start, end);
+            String blockContent = content.substring(start, end);
+            editable.setSpan(getBlockSpan(spanClazz, blockContent), start, end, getBlockSpanFlag(blockType));
+            mRichEditText.setCursorHeight(getCursorHeight(blockType));
+            setOtherBlockStyleBtnDisable(blockType);
+        } else {
+            // 为了避免重复，移除统一段落自己类型的BlockSpan
+            removeBlockSpan(spanClazz, start, end);
+            resetCursorHeight();
+        }
+    }
+
+    /**
+     * 处理段落样式各个按钮的状态（点亮或置灰）
+     *
+     * @param type 样式类型
+     */
+    private boolean handleBlockTypeButtonStatus(@RichTypeEnum String type) {
+        Editable editable = mRichEditText.getEditableText();
+        int cursorPos = mRichEditText.getSelectionEnd();
+        String content = editable.toString();
+        IBlockSpan[] blockSpans;
+        if (cursorPos == 0 || content.charAt(cursorPos - 1) == '\n') {
+            // 若光标处于block的起始位置
+            blockSpans = (IBlockSpan[]) editable.getSpans(cursorPos, cursorPos + 1, getSpanClassFromType(type));
+        } else {
+            //光标处于block的中间或末尾
+            blockSpans = (IBlockSpan[]) editable.getSpans(cursorPos - 1, cursorPos, getSpanClassFromType(type));
+        }
+
+        return blockSpans.length > 0;
+    }
+
+    /**
+     * 处理行内样式各个按钮的状态（点亮或置灰）
+     *
+     * @param type 样式类型
+     */
+    private boolean handleInlineStyleButtonStatus(@RichTypeEnum String type) {
+        Editable editable = mRichEditText.getEditableText();
+        int cursorPos = mRichEditText.getSelectionEnd();
+        IInlineSpan[] inlineSpans = (IInlineSpan[]) editable.getSpans(cursorPos, cursorPos, getSpanClassFromType(type));
+        if (inlineSpans.length <= 0) {
+            return false;
+        }
+
+        boolean isLight = false; //是否点亮
+
+        for (IInlineSpan span : inlineSpans) {
+            int spanStart = editable.getSpanStart(span);
+            int spanEnd = editable.getSpanEnd(span);
+            int spanFlag = editable.getSpanFlags(span);
+            if (spanStart < cursorPos && spanEnd > cursorPos) {
+                isLight = true;
+            } else if (spanStart == cursorPos
+                    && (spanFlag == Spanned.SPAN_INCLUSIVE_INCLUSIVE || spanFlag == Spanned.SPAN_INCLUSIVE_EXCLUSIVE)) {
+                isLight = true;
+            } else if (spanEnd == cursorPos
+                    && (spanFlag == Spanned.SPAN_INCLUSIVE_INCLUSIVE || spanFlag == Spanned.SPAN_EXCLUSIVE_INCLUSIVE)) {
+                isLight = true;
+            }
+        }
+
+        return isLight;
+    }
+
+    /**
+     * 将所有按钮置灰
+     */
+    private void clearStyleButtonsStatus() {
+        for (StyleBtnVm styleBtnVm : mRichTypeToVmMap.values()) {
+            styleBtnVm.setLight(false);
+            changeStyleBtnImage(styleBtnVm.getIvButton(), styleBtnVm.getNormalResId());
+        }
     }
 
     /**
      * 修改各个按钮的状态（点亮或置灰）
      */
     private void handleStyleButtonsStatus() {
-        Editable editable = mRichEditText.getEditableText();
-        int cursorPos = mRichEditText.getSelectionEnd();
-        String content = mRichEditText.getText().toString();
-
         // 先将所有按钮置灰
-        for (InlineStyleVm inlineStyleVm : mInlineTypeToVmMap.values()) {
-            inlineStyleVm.setLight(false);
-            changeStyleBtnImage(inlineStyleVm.getIvButton(), inlineStyleVm.getNormalResId());
-        }
+        clearStyleButtonsStatus();
 
-        // TODO 段内样式也同样处理
-
-        for (String type : mInlineTypeToVmMap.keySet()) {
-            ParcelableSpan[] parcelableSpans = (ParcelableSpan[]) editable.getSpans(cursorPos, cursorPos, getInlineSpanClassFromType(type));
-            if (parcelableSpans.length <= 0) {
-                continue;
-            }
-
-            boolean isLight = false; //是否点亮
-
-            for (ParcelableSpan span : parcelableSpans) {
-                int spanStart = editable.getSpanStart(span);
-                int spanEnd = editable.getSpanEnd(span);
-                int spanFlag = editable.getSpanFlags(span);
-                if (spanStart < cursorPos && spanEnd > cursorPos) {
-                    isLight = true;
-                } else if (spanStart == cursorPos
-                        && (spanFlag == Spanned.SPAN_INCLUSIVE_INCLUSIVE || spanFlag == Spanned.SPAN_INCLUSIVE_EXCLUSIVE)) {
-                    isLight = true;
-                } else if (spanEnd == cursorPos
-                        && (spanFlag == Spanned.SPAN_INCLUSIVE_INCLUSIVE || spanFlag == Spanned.SPAN_EXCLUSIVE_INCLUSIVE)) {
-                    isLight = true;
-                }
+        for (String type : mRichTypeToVmMap.keySet()) {
+            boolean isLight;
+            if (isInlineType(type)) {
+                isLight = handleInlineStyleButtonStatus(type);
+            } else {
+                isLight = handleBlockTypeButtonStatus(type);
             }
 
             if (isLight) {
-                InlineStyleVm inlineStyleVm = mInlineTypeToVmMap.get(type);
-                if (inlineStyleVm == null) {
+                StyleBtnVm styleBtnVm = mRichTypeToVmMap.get(type);
+                if (styleBtnVm == null) {
                     continue;
                 }
-                inlineStyleVm.setLight(true);
-                changeStyleBtnImage(inlineStyleVm.getIvButton(), inlineStyleVm.getLightResId());
+                styleBtnVm.setLight(true);
+                changeStyleBtnImage(styleBtnVm.getIvButton(), styleBtnVm.getLightResId());
             }
         }
-
-        // TODO 段内样式也同样处理
-
     }
 
     /**
      * 光标发生变化的时候，若光标的位置处于某个span的右侧，则将该span的end恢复成包含（inclusive）
+     *
      * @param cursorPos 当前位置
      * @param spanClazz 具体的spanClazz
      */
@@ -397,14 +615,35 @@ public class RichUtils {
         Editable editable = mRichEditText.getEditableText();
         ParcelableSpan[] parcelableSpans = (ParcelableSpan[]) editable.getSpans(cursorPos, cursorPos, spanClazz);
 
-        for (ParcelableSpan span: parcelableSpans) {
+        for (ParcelableSpan span : parcelableSpans) {
             int spanStart = editable.getSpanStart(span);
             int spanEnd = editable.getSpanEnd(span);
             if (spanEnd == cursorPos) {
                 editable.removeSpan(span);
-                editable.setSpan(getInlineStyleSpan(spanClazz), spanStart, spanEnd, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+                if (span instanceof IInlineSpan) {
+                    editable.setSpan(getInlineStyleSpan(spanClazz), spanStart, spanEnd, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+                } else if (span instanceof IBlockSpan) {
+                    IBlockSpan blockSpan = (IBlockSpan) span;
+                    IBlockSpan newBlockSpan = getBlockSpan(spanClazz, blockSpan.getContent());
+                    editable.setSpan(newBlockSpan, spanStart, spanEnd, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                }
             }
         }
+    }
+
+    private void changeCursorHeight() {
+        Editable editable = mRichEditText.getEditableText();
+        int cursorPos = mRichEditText.getSelectionStart();
+
+        IBlockSpan[] blockSpans = editable.getSpans(cursorPos, cursorPos, IBlockSpan.class);
+        if (blockSpans.length == 0) {
+            // 当前段落没有block样式
+            resetCursorHeight();
+            return;
+        }
+
+        IBlockSpan blockSpan = blockSpans[0];
+        mRichEditText.setCursorHeight(getCursorHeight(blockSpan.getType()));
     }
 
     /**
@@ -414,13 +653,19 @@ public class RichUtils {
      */
     private void handleSelectionChanged(int cursorPos) {
         // 先合并指定位置前后连续的行内样式
-        for (String type : mInlineTypeToVmMap.keySet()) {
-            mergeContinuousInlineSpan(cursorPos, cursorPos, getInlineSpanClassFromType(type));
-            restoreSpanEndToInclusive(cursorPos, getInlineSpanClassFromType(type));
+        for (String type : mRichTypeToVmMap.keySet()) {
+            boolean isInlineType = isInlineType(type);
+            if (isInlineType) {
+                mergeContinuousInlineSpan(cursorPos, cursorPos, getSpanClassFromType(type));
+            }
+            restoreSpanEndToInclusive(cursorPos, getSpanClassFromType(type));
         }
 
         // 修改各个按钮的状态（点亮或置灰）
         handleStyleButtonsStatus();
+
+        // 根据光标的位置动态修改光标的高度
+        changeCursorHeight();
     }
 
     /**
@@ -433,6 +678,90 @@ public class RichUtils {
         // TODO
 
         return false;
+    }
+
+    /**
+     * 删除回车之后需要处理两行的block span合并，修改成第一行的block样式
+     */
+    void mergeBlockSpanAfterDeleteEnter() {
+        Editable editable = mRichEditText.getEditableText();
+        int[] curBlockBoundary = getCursorPosBlockBoundary();
+        int start = curBlockBoundary[0];
+        int end = curBlockBoundary[1];
+        // 合并前第一行的block span
+        IBlockSpan[] firstBlockSpans = editable.getSpans(start, start, IBlockSpan.class);
+        // 合并后的block span
+        IBlockSpan[] mergeBlockSpans = editable.getSpans(start, end, IBlockSpan.class);
+
+        // 清空合并后的block span
+        for (IBlockSpan blockSpan : mergeBlockSpans) {
+            editable.removeSpan(blockSpan);
+        }
+
+        if (firstBlockSpans.length <= 0) {
+            return;
+        }
+
+        String blockType = firstBlockSpans[0].getType();
+        Class spanClazz = getSpanClassFromType(blockType);
+
+        String blockContent = editable.toString().substring(start, end);
+        editable.setSpan(getBlockSpan(spanClazz, blockContent), start, end, getBlockSpanFlag(blockType));
+        mRichEditText.setCursorHeight(getCursorHeight(blockType));
+        setOtherBlockStyleBtnDisable(blockType);
+    }
+
+    void changeLastBlockOrInlineSpanFlag() {
+        Editable editable = mRichEditText.getEditableText();
+        int cursorPos = mRichEditText.getSelectionStart();
+
+        // 先处理行内样式
+        IInlineSpan[] inlineSpans = editable.getSpans(cursorPos - 1, cursorPos - 1, IInlineSpan.class);
+
+        for (IInlineSpan span : inlineSpans) {
+            int start = editable.getSpanStart(span);
+            int end = editable.getSpanEnd(span);
+            if (cursorPos > end) {
+                continue;
+            }
+            Class spanClazz = getSpanClassFromType(span.getType());
+            IInlineSpan newSpan = getInlineStyleSpan(spanClazz);
+            editable.removeSpan(span);
+            if (cursorPos == end) {
+                // 在span末尾点击了回车
+                editable.setSpan(newSpan, start, end - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                // 在span中间点击了回车, 需要将一个span拆成两个span
+                editable.setSpan(newSpan, start, cursorPos - 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                IInlineSpan newRightSpan = getInlineStyleSpan(spanClazz);
+                editable.setSpan(newRightSpan, cursorPos, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            }
+        }
+
+        // 再处理段落样式
+        IBlockSpan[] blockSpans = editable.getSpans(cursorPos - 1, cursorPos - 1, IBlockSpan.class);
+
+        for (IBlockSpan span : blockSpans) {
+            int start = editable.getSpanStart(span);
+            int end = editable.getSpanEnd(span);
+            if (cursorPos > end) {
+                continue;
+            }
+            Class spanClazz = getSpanClassFromType(span.getType());
+            editable.removeSpan(span);
+            String content = span.getContent();
+            if (cursorPos == end) {
+                // 在span末尾点击了回车
+                IBlockSpan newSpan = getBlockSpan(spanClazz, content);
+                editable.setSpan(newSpan, start, end - 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            } else {
+                // 在span中间点击了回车, 需要将一个span拆成两个span
+                IBlockSpan newLeftSpan = getBlockSpan(spanClazz, content.substring(0, cursorPos - start - 1));
+                editable.setSpan(newLeftSpan, start, cursorPos - 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                IBlockSpan newRightSpan = getBlockSpan(spanClazz, content.substring(cursorPos - start - 1));
+                editable.setSpan(newRightSpan, cursorPos, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            }
+        }
     }
 
 }

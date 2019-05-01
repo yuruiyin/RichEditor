@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 标题字体大小 -->
+    <dimen name="rich_editor_headline_text_size">20dp</dimen>
+
+    <!-- 引用左侧竖线宽度 -->
+    <dimen name="rich_editor_quote_stripe_width">7dp</dimen>
+
+    <!-- 引用左侧竖线高度 -->
+    <dimen name="rich_editor_quote_stripe_height">7dp</dimen>
+
+    <!-- 引用左侧竖线与文本之间的距离 -->
+    <dimen name="rich_editor_quote_gap_width">14dp</dimen>
+
+    <!-- 引用段落字体大小 -->
+    <dimen name="rich_editor_quote_text_size">18dp</dimen>
+
+</resources>

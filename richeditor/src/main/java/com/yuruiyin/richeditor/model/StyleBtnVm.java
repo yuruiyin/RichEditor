@@ -1,21 +1,27 @@
 package com.yuruiyin.richeditor.model;
 
 import android.widget.ImageView;
-import com.yuruiyin.richeditor.enumtype.InlineStyleEnum;
+
+import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
 
 /**
- * Title:行内样式实体
+ * Title: 样式实体
  * Description:
  *
  * @author yuruiyin
  * @version 2019-04-29
  */
-public class InlineStyleVm {
+public class StyleBtnVm {
 
     /**
-     * 行内样式具体类型（包含粗体、斜体等）
+     * 具体类型（包含粗体、斜体、标题等）
      */
-    private @InlineStyleEnum String type;
+    private @RichTypeEnum String type;
+
+    /**
+     * 是否行内样式
+     */
+    private boolean isInlineType;
 
     /**
      * 按钮ImageView
@@ -37,7 +43,7 @@ public class InlineStyleVm {
      */
     private int lightResId;
 
-    public InlineStyleVm(@InlineStyleEnum String type, ImageView ivButton, int normalResId, int lightResId) {
+    public StyleBtnVm(@RichTypeEnum String type, ImageView ivButton, int normalResId, int lightResId) {
         this.type = type;
         this.ivButton = ivButton;
         this.isLight = false;
@@ -85,4 +91,11 @@ public class InlineStyleVm {
         this.lightResId = lightResId;
     }
 
+    public boolean isInlineType() {
+        return isInlineType;
+    }
+
+    public void setIsInlineType(boolean isInlineType) {
+        this.isInlineType = isInlineType;
+    }
 }

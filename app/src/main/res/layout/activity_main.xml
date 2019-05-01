@@ -53,28 +53,53 @@
                 android:src="@mipmap/icon_underline_normal"
                 />
 
+            <ImageView
+                android:id="@+id/ivHeadline"
+                android:layout_width="@dimen/style_button_size"
+                android:layout_height="@dimen/style_button_size"
+                android:padding="7dp"
+                android:src="@mipmap/icon_headline_normal"
+                />
+
+            <ImageView
+                android:id="@+id/ivBlockquote"
+                android:layout_width="@dimen/style_button_size"
+                android:layout_height="@dimen/style_button_size"
+                android:padding="7dp"
+                android:src="@mipmap/icon_blockquote_normal"
+                />
+
         </LinearLayout>
 
     </HorizontalScrollView>
 
-    <com.yuruiyin.richeditor.RichEditText
-        android:id="@+id/richEditText"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:background="#ffffff"
-        android:gravity="top|left"
-        android:hint="请输入..."
-        android:inputType="textMultiLine"
-        android:maxLength="20000"
-        android:minHeight="350dp"
-        android:paddingBottom="70dp"
-        android:paddingLeft="14dp"
-        android:paddingRight="14dp"
-        android:paddingTop="23dp"
-        android:textColor="#171717"
-        android:textColorHint="#aaaaaa"
-        android:textSize="16dp"
-        />
+        >
+
+        <com.yuruiyin.richeditor.RichEditText
+            android:id="@+id/richEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="#ffffff"
+            android:gravity="top|left"
+            android:hint="请输入..."
+            android:inputType="textMultiLine"
+            android:maxLength="20000"
+            android:minHeight="350dp"
+            android:paddingBottom="70dp"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp"
+            android:paddingTop="23dp"
+            android:textColor="#171717"
+            android:textColorHint="#aaaaaa"
+            android:textSize="16dp"
+            android:lineSpacingMultiplier="1.5"
+            android:textCursorDrawable="@null"
+            />
+
+    </ScrollView>
 
 </LinearLayout>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 引用左侧竖线的颜色 -->
+    <color name="rich_editor_quote_stripe_color">#ff717171</color>
+
+    <!-- 引用背景色 -->
+    <color name="rich_editor_quote_bg_color">#fff3f3f3</color>
+
+</resources>

@@ -19,6 +19,8 @@ public class RichEditText extends LineHeightEditText {
 
     private Context mContext;
 
+    private RichUtils mRichUtils;
+
     public interface OnSelectionChangedListener {
         /**
          * 光标位置改变回调
@@ -68,6 +70,14 @@ public class RichEditText extends LineHeightEditText {
     private void init(Context context) {
         mContext = context;
         mRichInputConnection = new RichInputConnectionWrapper(null, true);
+    }
+
+    public void setRichUtils(RichUtils richUtils) {
+        mRichUtils = richUtils;
+    }
+
+    public RichUtils getRichUtils() {
+        return mRichUtils;
     }
 
     /**
