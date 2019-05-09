@@ -4,15 +4,14 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Typeface;
-import android.support.annotation.NonNull;
 import android.text.Layout;
 import android.text.Spanned;
-import android.text.TextPaint;
-import android.text.style.*;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.LeadingMarginSpan;
+import android.text.style.LineBackgroundSpan;
+import android.text.style.LineHeightSpan;
 import com.yuruiyin.richeditor.R;
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
-import com.yuruiyin.richeditor.model.IBlockSpan;
 
 /**
  * Title: 自定义的引用span
@@ -94,12 +93,6 @@ public class CustomQuoteSpan extends AbsoluteSizeSpan implements
         p.setColor(mBgColor);
         c.drawRect(new Rect(left, top, right, bottom), p);
         p.setColor(paintColor);
-    }
-
-    @Override
-    public void updateDrawState(@NonNull TextPaint ds) {
-        super.updateDrawState(ds);
-        ds.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
     }
 
     @Override

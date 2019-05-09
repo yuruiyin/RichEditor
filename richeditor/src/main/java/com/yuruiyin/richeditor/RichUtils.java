@@ -3,13 +3,12 @@ package com.yuruiyin.richeditor;
 import android.app.Activity;
 import android.text.Editable;
 import android.text.ParcelableSpan;
+import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.style.ImageSpan;
 import android.view.KeyEvent;
 import android.widget.ImageView;
-import com.yuruiyin.richeditor.enumtype.BlockTypeEnum;
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
-import com.yuruiyin.richeditor.model.IBlockSpan;
-import com.yuruiyin.richeditor.model.IInlineSpan;
 import com.yuruiyin.richeditor.model.StyleBtnVm;
 import com.yuruiyin.richeditor.span.*;
 import com.yuruiyin.richeditor.utils.SoftKeyboardUtil;
@@ -28,6 +27,8 @@ public class RichUtils {
 
     private static final String TAG = "RichUtils";
 
+    private static final String IMAGE_SPAN_PLACEHOLDER = "image_span_placeholder";
+
     private RichEditText mRichEditText;
 
     private Activity mActivity;
@@ -35,12 +36,13 @@ public class RichUtils {
     // 标记支持哪些行内样式
     private Map<String, StyleBtnVm> mRichTypeToVmMap = new HashMap<>();
 
-    public RichUtils(Activity activity, RichEditText richEditText) {
+    RichUtils(Activity activity, RichEditText richEditText) {
         mActivity = activity;
         mRichEditText = richEditText;
+        registerEvents();
     }
 
-    public void init() {
+    private void registerEvents() {
         // 将当前实例传给RichEditText保存一份，未来需要用到
         mRichEditText.setRichUtils(this);
         RichTextWatcher mTextWatcher = new RichTextWatcher(mRichEditText);
@@ -65,6 +67,77 @@ public class RichUtils {
         });
     }
 
+    /**
+     * 初始化样式按钮（如注册按钮监听器）
+     *
+     * @param styleBtnVm 样式实体
+     */
+    void initStyleButton(StyleBtnVm styleBtnVm) {
+        String type = styleBtnVm.getType();
+        styleBtnVm.setIsInlineType(isInlineType(type));
+        mRichTypeToVmMap.put(type, styleBtnVm);
+        styleBtnVm.getIvButton().setOnClickListener(v -> {
+            if (mRichEditText.isFocused()) {
+                // 若未聚焦，则不响应点击事件
+                toggleStyle(type);
+            }
+        });
+    }
+
+    /**
+     * 在光标位置插入段落ImageSpan（如图片、视频封面、自定义view等）
+     *
+     * @param blockImageSpan 段落ImageSpan
+     */
+    void insertBlockImageSpan(BlockImageSpan blockImageSpan) {
+        if (blockImageSpan == null) {
+            return;
+        }
+
+        // 在ImageSpan前面都插入一空行
+        insertStringIntoEditText("\n", mRichEditText.getSelectionStart());
+
+        //将bitmap插入到editText中
+        SpannableString imageSpannableString = new SpannableString(IMAGE_SPAN_PLACEHOLDER);
+        imageSpannableString.setSpan(blockImageSpan, 0, IMAGE_SPAN_PLACEHOLDER.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        insertStringIntoEditText(imageSpannableString, mRichEditText.getSelectionStart());
+
+        //在imageSpan后面都插入一空行
+        insertStringIntoEditText("\n", mRichEditText.getSelectionStart());
+    }
+
+    /**
+     * 删除指定的段落ImageSpan（如已插入的图片、视频封面、自定义view等）
+     * 场景：用户长按ImageSpan触发弹窗然后点击删除操作
+     *
+     * @param blockImageSpan 段落ImageSpan
+     */
+    public void removeBlockImageSpan(BlockImageSpan blockImageSpan) {
+        Editable editable = mRichEditText.getEditableText();
+        BlockImageSpan[] blockImageSpans = editable.getSpans(0, editable.length(), BlockImageSpan.class);
+
+        for (BlockImageSpan curBlockImageSpan : blockImageSpans) {
+            if (curBlockImageSpan == blockImageSpan) {
+                int start = editable.getSpanStart(curBlockImageSpan);
+                int end = editable.getSpanEnd(curBlockImageSpan);
+                editable.removeSpan(curBlockImageSpan);
+                editable.delete(start, end);
+                break;
+            }
+        }
+    }
+
+    private void insertStringIntoEditText(CharSequence content, int pos) {
+        Editable editable = mRichEditText.getEditableText();//获得文本内容
+        if (pos < 0 || pos >= editable.length()) {
+            editable.append(content);
+            mRichEditText.setSelection(editable.length());
+        } else {
+            editable.insert(pos, content);
+            mRichEditText.setSelection(pos + content.length());
+        }
+    }
+
     private void changeStyleBtnImage(ImageView imageView, int resId) {
         imageView.setImageResource(resId);
     }
@@ -80,23 +153,6 @@ public class RichUtils {
         }
 
         return true;
-    }
-
-    /**
-     * 初始化样式按钮（如注册按钮监听器）
-     *
-     * @param styleBtnVm 样式实体
-     */
-    public void initStyleButton(StyleBtnVm styleBtnVm) {
-        String type = styleBtnVm.getType();
-        styleBtnVm.setIsInlineType(isInlineType(type));
-        mRichTypeToVmMap.put(type, styleBtnVm);
-        styleBtnVm.getIvButton().setOnClickListener(v -> {
-            if (mRichEditText.isFocused()) {
-                // 若未聚焦，则不响应点击事件
-                toggleStyle(type);
-            }
-        });
     }
 
     private IBlockSpan getBlockSpan(Class spanClazz, String content) {
@@ -339,10 +395,9 @@ public class RichUtils {
     }
 
     /**
-     * 处理加粗
-     * 修改选中区域的粗体样式
+     * 处理样式修改
      */
-    private void toggleStyle(@BlockTypeEnum String type) {
+    private void toggleStyle(@RichTypeEnum String type) {
         if (!isTextBlock()) {
             return;
         }
@@ -472,6 +527,15 @@ public class RichUtils {
     }
 
     private int getCursorHeight(@RichTypeEnum String type) {
+        Editable editable = mRichEditText.getEditableText();
+        int cursorPos = mRichEditText.getSelectionStart();
+        BlockImageSpan[] blockImageSpans = editable.getSpans(cursorPos - 1, cursorPos, BlockImageSpan.class);
+
+        if (blockImageSpans.length > 0) {
+            // 若光标处于ImageSpan段落上，则光标的高度设置为图片的高度即可
+            return blockImageSpans[0].getDrawable().getIntrinsicHeight();
+        }
+
         switch (type) {
             case RichTypeEnum.HEADLINE:
                 return (int) (mActivity.getResources().getDimension(R.dimen.rich_editor_headline_text_size) * 1.25);
@@ -525,7 +589,7 @@ public class RichUtils {
         int cursorPos = mRichEditText.getSelectionEnd();
         String content = editable.toString();
         IBlockSpan[] blockSpans;
-        if (cursorPos == 0 || content.charAt(cursorPos - 1) == '\n') {
+        if (cursorPos <= 0 || content.charAt(cursorPos - 1) == '\n') {
             // 若光标处于block的起始位置
             blockSpans = (IBlockSpan[]) editable.getSpans(cursorPos, cursorPos + 1, getSpanClassFromType(type));
         } else {
@@ -652,6 +716,15 @@ public class RichUtils {
      * @param cursorPos 当前光标位置
      */
     private void handleSelectionChanged(int cursorPos) {
+        //如果光标定位到了imagespan的前面，则将光标移动到imageSpan的后面
+        Editable editable = mRichEditText.getEditableText();
+        ImageSpan[] imageSpans = editable.getSpans(cursorPos, cursorPos + 1, ImageSpan.class);
+        if (imageSpans.length > 0) {
+            //说明光标在ImageSpan的前面
+            mRichEditText.setSelection(cursorPos + 1);
+            return;
+        }
+
         // 先合并指定位置前后连续的行内样式
         for (String type : mRichTypeToVmMap.keySet()) {
             boolean isInlineType = isInlineType(type);
@@ -675,7 +748,32 @@ public class RichUtils {
      * 不删除字符，而是将光标定位到上一行的末尾（即BlockImageSpan的末尾）
      */
     private boolean handleDeleteKey() {
-        // TODO
+        Editable editable = mRichEditText.getEditableText();
+        int cursorPos = mRichEditText.getSelectionStart();
+        if (cursorPos == 0) {
+            return false;
+        }
+
+        //删除imageSpan的时候直接将光标定位到上一行末尾
+        BlockImageSpan[] imageSpans = editable.getSpans(cursorPos - 1, cursorPos, BlockImageSpan.class);
+        if (imageSpans.length > 0) {
+            ImageSpan imageSpan = imageSpans[0];
+            int start = editable.getSpanStart(imageSpan);
+            int end = editable.getSpanEnd(imageSpan);
+            if (start > 0) {
+                start--; //光标跳到上一行
+            }
+            editable.delete(start, end);
+            return true;
+        }
+
+        //当光标处于imageSpan下一行（当行不是空行）的第一个位置上按删除按键时
+        BlockImageSpan[] imageSpans1 = editable.getSpans(cursorPos - 2, cursorPos - 1, BlockImageSpan.class);
+        String content = mRichEditText.getText().toString();
+        if (imageSpans1.length > 0 && cursorPos < content.length() && content.charAt(cursorPos) != '\n') {
+            mRichEditText.setSelection(cursorPos - 1);
+            return true;
+        }
 
         return false;
     }
@@ -756,10 +854,23 @@ public class RichUtils {
                 editable.setSpan(newSpan, start, end - 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
             } else {
                 // 在span中间点击了回车, 需要将一个span拆成两个span
-                IBlockSpan newLeftSpan = getBlockSpan(spanClazz, content.substring(0, cursorPos - start - 1));
-                editable.setSpan(newLeftSpan, start, cursorPos - 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-                IBlockSpan newRightSpan = getBlockSpan(spanClazz, content.substring(cursorPos - start - 1));
-                editable.setSpan(newRightSpan, cursorPos, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                // 这里需要考虑在span的起始位置或者中间插入了图片
+                String leftSpanContent = editable.toString().substring(start, cursorPos - 1);
+                String rightSpanContent = editable.toString().substring(cursorPos, end);
+                int leftSpanEnd = cursorPos - 1;
+                if (leftSpanContent.contains(IMAGE_SPAN_PLACEHOLDER)) {
+                    // 在图片后面blockSpan前面插入了回车符
+                    leftSpanContent = leftSpanContent.substring(0, leftSpanContent.length() - IMAGE_SPAN_PLACEHOLDER.length());
+                    leftSpanEnd -= IMAGE_SPAN_PLACEHOLDER.length();
+                }
+                if (!leftSpanContent.isEmpty()) {
+                    IBlockSpan newLeftSpan = getBlockSpan(spanClazz, leftSpanContent);
+                    editable.setSpan(newLeftSpan, start, leftSpanEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                }
+                if (!rightSpanContent.isEmpty()) {
+                    IBlockSpan newRightSpan = getBlockSpan(spanClazz, rightSpanContent);
+                    editable.setSpan(newRightSpan, cursorPos, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                }
             }
         }
     }

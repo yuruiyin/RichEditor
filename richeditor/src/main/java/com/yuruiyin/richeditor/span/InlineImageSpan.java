@@ -13,10 +13,6 @@ import android.graphics.drawable.Drawable;
  */
 public class InlineImageSpan extends CenterImageSpan {
 
-    public InlineImageSpan(Context context, int resourceId) {
-        super(context, resourceId);
-    }
-
     public InlineImageSpan(Context context, Bitmap bitmap) {
         super(context, bitmap);
     }

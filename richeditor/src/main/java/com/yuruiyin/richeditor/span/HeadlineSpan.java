@@ -6,7 +6,6 @@ import android.text.TextPaint;
 import android.text.style.AbsoluteSizeSpan;
 import com.yuruiyin.richeditor.R;
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
-import com.yuruiyin.richeditor.model.IBlockSpan;
 
 /**
  * Title:文章标题span

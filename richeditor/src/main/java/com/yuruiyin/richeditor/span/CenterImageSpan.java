@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.text.style.ImageSpan;
 
 import java.lang.ref.WeakReference;
@@ -31,6 +32,10 @@ public class CenterImageSpan extends ImageSpan {
 
     public CenterImageSpan(Drawable drawable) {
         super(drawable);
+    }
+
+    public CenterImageSpan(Context context, Uri uri) {
+        super(context, uri);
     }
 
     @Override public int getSize(Paint paint, CharSequence text, int start, int end,
@@ -79,4 +84,5 @@ public class CenterImageSpan extends ImageSpan {
 
         return d;
     }
+
 }

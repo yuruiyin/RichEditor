@@ -3,7 +3,6 @@ package com.yuruiyin.richeditor.span;
 import android.text.style.UnderlineSpan;
 
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
-import com.yuruiyin.richeditor.model.IInlineSpan;
 
 /**
  * Title:

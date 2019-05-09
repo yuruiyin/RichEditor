@@ -1,4 +1,4 @@
-package com.yuruiyin.richeditor.model;
+package com.yuruiyin.richeditor.span;
 
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
 
@@ -9,10 +9,8 @@ import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
  * @author yuruiyin
  * @version 2019-04-30
  */
-public interface IBlockSpan {
+public interface IInlineSpan {
 
     @RichTypeEnum String getType();
-
-    String getContent();
 
 }

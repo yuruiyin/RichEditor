@@ -4,7 +4,6 @@ import android.graphics.Typeface;
 import android.text.style.StyleSpan;
 
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
-import com.yuruiyin.richeditor.model.IInlineSpan;
 
 /**
  * Title:
@@ -26,4 +25,5 @@ public class BoldStyleSpan extends StyleSpan implements IInlineSpan {
     public String getType() {
         return type;
     }
+
 }

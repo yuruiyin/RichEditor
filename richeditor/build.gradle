@@ -36,5 +36,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     //可以解决行间距异常的EditText
-    implementation 'com.hanks:lineheightedittext-library:1.0'
+    api 'com.hanks:lineheightedittext-library:1.0'
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
+    android:id="@+id/vgRoot"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -69,6 +70,22 @@
                 android:src="@mipmap/icon_blockquote_normal"
                 />
 
+            <ImageView
+                android:id="@+id/ivAddImage"
+                android:layout_width="@dimen/style_button_size"
+                android:layout_height="@dimen/style_button_size"
+                android:padding="7dp"
+                android:src="@mipmap/icon_picture"
+                />
+
+            <ImageView
+                android:id="@+id/ivAddDivider"
+                android:layout_width="@dimen/style_button_size"
+                android:layout_height="@dimen/style_button_size"
+                android:padding="7dp"
+                android:src="@mipmap/icon_divider_normal"
+                />
+
         </LinearLayout>
 
     </HorizontalScrollView>
@@ -87,17 +104,17 @@
             android:gravity="top|left"
             android:hint="请输入..."
             android:inputType="textMultiLine"
+            android:lineSpacingExtra="5dp"
             android:maxLength="20000"
             android:minHeight="350dp"
             android:paddingBottom="70dp"
-            android:paddingLeft="14dp"
-            android:paddingRight="14dp"
+            android:paddingLeft="@dimen/editor_padding_left"
+            android:paddingRight="@dimen/editor_padding_right"
             android:paddingTop="23dp"
             android:textColor="#171717"
             android:textColorHint="#aaaaaa"
-            android:textSize="16dp"
-            android:lineSpacingMultiplier="1.5"
             android:textCursorDrawable="@null"
+            android:textSize="16dp"
             />
 
     </ScrollView>
