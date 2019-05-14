@@ -4,7 +4,7 @@
     <dimen name="style_button_size">40dp</dimen>
 
     <!-- 编辑器中图片的宽度 -->
-    <dimen name="editor_image_width">118dp</dimen>
+    <dimen name="editor_image_width">200dp</dimen>
 
     <!-- 编辑器中长图显示最大高度 -->
     <dimen name="editor_image_max_height">1000dp</dimen>

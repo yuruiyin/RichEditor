@@ -22,6 +22,7 @@
     <dimen name="rich_editor_image_span_padding_right">2dp</dimen>
 
     <!-- 限制图片最大的高度，避免调用方传递超级大的高度而导致长图限制超级长的问题 -->
-    <dimen name="rich_editor_image_max_height">300dp</dimen>
+    <dimen name="rich_editor_image_width">120dp</dimen>
+    <dimen name="rich_editor_image_max_height">640dp</dimen>
 
 </resources>

@@ -2,6 +2,7 @@
 <LinearLayout
     android:id="@+id/vgRoot"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -86,6 +87,15 @@
                 android:src="@mipmap/icon_divider_normal"
                 />
 
+            <TextView
+                android:id="@+id/tvCreateJson"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/style_button_size"
+                android:gravity="center"
+                android:padding="7dp"
+                android:text="生成json"
+                />
+
         </LinearLayout>
 
     </HorizontalScrollView>
@@ -95,27 +105,46 @@
         android:layout_height="wrap_content"
         >
 
-        <com.yuruiyin.richeditor.RichEditText
-            android:id="@+id/richEditText"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="#ffffff"
-            android:gravity="top|left"
-            android:hint="请输入..."
-            android:inputType="textMultiLine"
-            android:lineSpacingExtra="5dp"
-            android:maxLength="20000"
-            android:minHeight="350dp"
-            android:paddingBottom="70dp"
-            android:paddingLeft="@dimen/editor_padding_left"
-            android:paddingRight="@dimen/editor_padding_right"
-            android:paddingTop="23dp"
-            android:textColor="#171717"
-            android:textColorHint="#aaaaaa"
-            android:textCursorDrawable="@null"
-            android:textSize="16dp"
-            />
+            android:orientation="vertical"
+            >
+
+            <com.yuruiyin.richeditor.RichEditText
+                android:id="@+id/richEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="#ffffff"
+                android:gravity="top|left"
+                android:hint="请输入..."
+                android:inputType="textMultiLine"
+                android:lineSpacingExtra="5dp"
+                android:maxLength="20000"
+                android:minHeight="350dp"
+                android:paddingBottom="70dp"
+                android:paddingLeft="@dimen/editor_padding_left"
+                android:paddingRight="@dimen/editor_padding_right"
+                android:paddingTop="23dp"
+                android:textColor="#171717"
+                android:textColorHint="#aaaaaa"
+                android:textCursorDrawable="@null"
+                android:textSize="16dp"
+                app:re_video_mark_resource_id="@mipmap/editor_video_mark_icon"
+                />
+
+            <TextView
+                android:id="@+id/tvContentJson"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@color/base_white"
+                android:padding="15dp"
+                android:text="json数据"
+                />
+
+        </LinearLayout>
 
     </ScrollView>
 

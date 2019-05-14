@@ -13,6 +13,4 @@ public interface IBlockSpan {
 
     @RichTypeEnum String getType();
 
-    String getContent();
-
 }

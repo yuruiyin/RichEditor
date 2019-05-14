@@ -16,19 +16,11 @@ import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
  */
 public class HeadlineSpan extends AbsoluteSizeSpan implements IBlockSpan {
 
-    private String mContent;
     private String type;
 
-    public HeadlineSpan(Context context, String content) {
+    public HeadlineSpan(Context context) {
         super((int) context.getResources().getDimension(R.dimen.rich_editor_headline_text_size));
-        mContent = content;
-
-        type = RichTypeEnum.HEADLINE;
-    }
-
-    @Override
-    public String getContent() {
-        return mContent;
+        type = RichTypeEnum.BLOCK_HEADLINE;
     }
 
     @Override

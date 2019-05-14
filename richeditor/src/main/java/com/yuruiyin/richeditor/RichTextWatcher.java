@@ -27,15 +27,12 @@ public class RichTextWatcher implements TextWatcher {
     // 上次的输入框内容
     private String lastEditTextContent = "";
 
-    private RichUtils mRichUtils;
-
     // 是否删除了回车符
     private boolean isDeleteEnterStr;
 
     public RichTextWatcher(RichEditText editText) {
         mEditText = editText;
         mContext = mEditText.getContext();
-        mRichUtils = mEditText.getRichUtils();
     }
 
     /**
@@ -55,7 +52,7 @@ public class RichTextWatcher implements TextWatcher {
 
         if (isDeleteEnterStr) {
             // 删除了回车符，如果回车前后两行只要有一行是block样式，就要合并
-            mRichUtils.mergeBlockSpanAfterDeleteEnter();
+            mEditText.getRichUtils().mergeBlockSpanAfterDeleteEnter();
         }
     }
 
@@ -63,7 +60,7 @@ public class RichTextWatcher implements TextWatcher {
      * 修改上一行的段样式或者上一行末尾的N个行内样式的flag为end exclusive，即当前行与上一行断开连接
      */
     private void changeLastBlockOrInlineSpanFlag() {
-        mRichUtils.changeLastBlockOrInlineSpanFlag();
+        mEditText.getRichUtils().changeLastBlockOrInlineSpanFlag();
     }
 
     @Override

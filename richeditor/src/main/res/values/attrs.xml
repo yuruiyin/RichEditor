@@ -2,7 +2,7 @@
 <resources>
 
     <declare-styleable name="RichEditText">
-
+        <attr name="re_video_mark_resource_id" format="reference" />
     </declare-styleable>
 
 </resources>

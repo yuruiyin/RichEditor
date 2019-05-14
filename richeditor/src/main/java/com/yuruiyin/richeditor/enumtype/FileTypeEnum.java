@@ -1,4 +1,4 @@
-package com.yuruiyin.richeditor.sample.enumtype;
+package com.yuruiyin.richeditor.enumtype;
 
 import android.support.annotation.StringDef;
 
@@ -6,19 +6,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Title:
+ * Title: 文件类型
  * Description:
  *
  * @author yuruiyin
- * @version 2019-05-08
+ * @version 2019-05-13
  */
 
 @Retention(RetentionPolicy.SOURCE)
-@StringDef({ImageSpanType.IMAGE, ImageSpanType.VIDEO, ImageSpanType.DIVIDER})
-public @interface ImageSpanType {
+@StringDef({FileTypeEnum.IMAGE, FileTypeEnum.VIDEO, FileTypeEnum.AUDIO})
+public @interface FileTypeEnum {
 
     /**
-     * 相册图片
+     * 图片
      */
     String IMAGE = "image";
 
@@ -28,8 +28,8 @@ public @interface ImageSpanType {
     String VIDEO = "video";
 
     /**
-     * 分割线
+     * 音频
      */
-    String DIVIDER = "divider";
+    String AUDIO = "audio";
 
 }

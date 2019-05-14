@@ -10,6 +10,7 @@ import android.text.style.AbsoluteSizeSpan;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LineBackgroundSpan;
 import android.text.style.LineHeightSpan;
+
 import com.yuruiyin.richeditor.R;
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
 
@@ -21,10 +22,9 @@ import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
  * @version 2019-04-30
  */
 public class CustomQuoteSpan extends AbsoluteSizeSpan implements
-        IBlockSpan, LeadingMarginSpan, LineBackgroundSpan, LineHeightSpan {
+    IBlockSpan, LeadingMarginSpan, LineBackgroundSpan, LineHeightSpan {
 
     private Context mContext;
-    private String mContent;
     private String type;
     // 引用背景色
     private int mBgColor;
@@ -37,7 +37,7 @@ public class CustomQuoteSpan extends AbsoluteSizeSpan implements
     // 引用竖线与文本的间距
     private int mGapWidth;
 
-    public CustomQuoteSpan(Context context, String content) {
+    public CustomQuoteSpan(Context context) {
         super((int) context.getResources().getDimension(R.dimen.rich_editor_quote_text_size));
 //        super(
 //                context.getResources().getColor(R.color.rich_editor_quote_stripe_color),
@@ -47,7 +47,6 @@ public class CustomQuoteSpan extends AbsoluteSizeSpan implements
 
         mContext = context;
         type = RichTypeEnum.BLOCK_QUOTE;
-        mContent = content;
         mBgColor = context.getResources().getColor(R.color.rich_editor_quote_bg_color);
         mStripeColor = context.getResources().getColor(R.color.rich_editor_quote_stripe_color);
         mStripeWidth = (int) mContext.getResources().getDimension(R.dimen.rich_editor_quote_stripe_width);
@@ -57,11 +56,6 @@ public class CustomQuoteSpan extends AbsoluteSizeSpan implements
     @Override
     public String getType() {
         return type;
-    }
-
-    @Override
-    public String getContent() {
-        return mContent;
     }
 
     @Override

@@ -12,6 +12,7 @@ import android.view.View;
 
 import com.yuruiyin.richeditor.RichEditText;
 import com.yuruiyin.richeditor.callback.OnImageClickListener;
+import com.yuruiyin.richeditor.model.BlockImageSpanVm;
 
 /**
  * Title: 段落ImageSpan
@@ -25,54 +26,40 @@ public class BlockImageSpan extends CenterImageSpan implements LongClickableSpan
     private float x;
     private float y;
 
-    /**
-     * 指定当前段落ImageSpan的类型（如图片、链接、视频封面、自定义view等）
-     * 注意：由于该类型组件无法预知，所以该字段值外部自行维护
-     */
-    private String mSpanType;
-
-    /**
-     * 当前ImageSpan所包含的实体（如图片、链接、视频封面、自定义view等相关实体数据）
-     */
-    private Object mSpanObject;
+    private BlockImageSpanVm blockImageSpanVm;
 
     private OnImageClickListener mOnImageClickListener;
 
-    public BlockImageSpan(Context context, int resourceId, @NonNull String spanType, Object spanObject) {
+    public BlockImageSpan(Context context, int resourceId, @NonNull BlockImageSpanVm blockImageSpanVm) {
         super(context, resourceId);
-        initData(spanType, spanObject);
+        initData(blockImageSpanVm);
     }
 
-    public BlockImageSpan(Context context, Bitmap bitmap, @NonNull String spanType, Object spanObject) {
+    public BlockImageSpan(Context context, Bitmap bitmap, @NonNull BlockImageSpanVm blockImageSpanVm) {
         super(context, bitmap);
-        initData(spanType, spanObject);
+        initData(blockImageSpanVm);
     }
 
-    public BlockImageSpan(Drawable drawable, @NonNull String spanType, Object spanObject) {
+    public BlockImageSpan(Drawable drawable, @NonNull BlockImageSpanVm blockImageSpanVm) {
         super(drawable);
-        initData(spanType, spanObject);
+        initData(blockImageSpanVm);
     }
 
-    public BlockImageSpan(Context context, Uri uri, @NonNull String spanType, Object spanObject) {
+    public BlockImageSpan(Context context, Uri uri, @NonNull BlockImageSpanVm blockImageSpanVm) {
         super(context, uri);
-        initData(spanType, spanObject);
+        initData(blockImageSpanVm);
     }
 
-    private void initData(@NonNull String spanType, Object spanObject) {
-        mSpanType = spanType;
-        mSpanObject = spanObject;
+    private void initData(@NonNull BlockImageSpanVm blockImageSpanVm) {
+        this.blockImageSpanVm = blockImageSpanVm;
     }
 
     public void setOnClickListener(OnImageClickListener onImageClickListener) {
         mOnImageClickListener = onImageClickListener;
     }
 
-    public String getSpanType() {
-        return mSpanType;
-    }
-
-    public Object getSpanObject() {
-        return mSpanObject;
+    public BlockImageSpanVm getBlockImageSpanVm() {
+        return blockImageSpanVm;
     }
 
     @Override
@@ -104,7 +91,7 @@ public class BlockImageSpan extends CenterImageSpan implements LongClickableSpan
         Drawable drawable = super.getDrawable();
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
-        int maxWidth = RichEditText.globalRichEditTextWidth;
+        int maxWidth = RichEditText.gRichEditTextWidthWithoutPadding;
 
         // 防止drawable宽度过大，超过编辑器的宽度
         if (width > maxWidth) {

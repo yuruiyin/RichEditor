@@ -1,5 +1,9 @@
 package com.yuruiyin.richeditor.model;
 
+import android.content.Context;
+
+import com.yuruiyin.richeditor.R;
+
 /**
  * Title: BlockImageSpan 相关数据
  * Description:
@@ -7,29 +11,35 @@ package com.yuruiyin.richeditor.model;
  * @author yuruiyin
  * @version 2019-05-09
  */
-public class BlockImageSpanVm {
-
-    private String type;
+public class BlockImageSpanVm<T extends IBlockImageSpanObtainObject> {
 
     private int width;
-
     private int maxHeight;
+    private T spanObject;
 
-    private Object spanObject;
+    // 插入的ImageSpan是否为视频封面，用来确定是否显示视频图标标识
+    private boolean isVideo;
 
-    public BlockImageSpanVm(String type, int width, int maxHeight, Object spanObject) {
-        this.type = type;
+    public BlockImageSpanVm(Context context, T spanObject) {
+        this.width = (int) context.getResources().getDimension(R.dimen.rich_editor_image_width);
+        this.maxHeight = (int) context.getResources().getDimension(R.dimen.rich_editor_image_max_height);
+        this.spanObject = spanObject;
+    }
+
+    public BlockImageSpanVm(Context context, T spanObject, boolean isVideo) {
+        this(context, spanObject);
+        this.isVideo = isVideo;
+    }
+
+    public BlockImageSpanVm(T spanObject, int width, int maxHeight) {
         this.width = width;
         this.maxHeight = maxHeight;
         this.spanObject = spanObject;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+    public BlockImageSpanVm(T spanObject, int width, int maxHeight, boolean isVideo) {
+        this(spanObject, width, maxHeight);
+        this.isVideo = isVideo;
     }
 
     public int getWidth() {
@@ -48,11 +58,19 @@ public class BlockImageSpanVm {
         this.maxHeight = maxHeight;
     }
 
-    public Object getSpanObject() {
+    public T getSpanObject() {
         return spanObject;
     }
 
-    public void setSpanObject(Object spanObject) {
+    public void setSpanObject(T spanObject) {
         this.spanObject = spanObject;
+    }
+
+    public boolean isVideo() {
+        return isVideo;
+    }
+
+    public void setVideo(boolean video) {
+        isVideo = video;
     }
 }

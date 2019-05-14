@@ -39,4 +39,6 @@ dependencies {
     api project(':richeditor')
 
 //    implementation 'com.hanks:lineheightedittext-library:1.0'
+
+    implementation 'com.google.code.gson:gson:2.8.5'
 }

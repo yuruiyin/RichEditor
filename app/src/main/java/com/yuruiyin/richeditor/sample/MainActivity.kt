@@ -3,20 +3,27 @@ package com.yuruiyin.richeditor.sample
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.Toast
+import com.google.gson.Gson
+import com.yuruiyin.richeditor.enumtype.FileTypeEnum
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum
 import com.yuruiyin.richeditor.model.BlockImageSpanVm
+import com.yuruiyin.richeditor.model.IBlockImageSpanObtainObject
 import com.yuruiyin.richeditor.model.StyleBtnVm
-import com.yuruiyin.richeditor.sample.enumtype.ImageSpanType
+import com.yuruiyin.richeditor.sample.model.DividerVm
 import com.yuruiyin.richeditor.sample.model.ImageVm
-import com.yuruiyin.richeditor.sample.utils.ImageUtil
+import com.yuruiyin.richeditor.sample.model.VideoVm
+import com.yuruiyin.richeditor.sample.utils.JsonUtil
 import com.yuruiyin.richeditor.sample.utils.WindowUtil
+import com.yuruiyin.richeditor.utils.FileUtil
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
     companion object {
         const val GET_PHOTO_REQUEST_CODE = 1
+        const val TAG = "MainActivity"
     }
 
     private val editorPaddingLeft by lazy {
@@ -47,6 +54,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun registerEvents() {
+        // 生成json数据，显示到TextView上
+        tvCreateJson.setOnClickListener {
+            val content = Gson().toJson(richEditText.content)
+            val formatJsonContent = JsonUtil.getFormatJson(content)
+            tvContentJson.text = formatJsonContent
+            Log.d(TAG, "\n $formatJsonContent")
+        }
+
         // 加粗
         richEditText.initStyleButton(
                 StyleBtnVm(
@@ -90,7 +105,7 @@ class MainActivity : AppCompatActivity() {
         // 标题
         richEditText.initStyleButton(
                 StyleBtnVm(
-                        RichTypeEnum.HEADLINE,
+                        RichTypeEnum.BLOCK_HEADLINE,
                         ivHeadline,
                         R.mipmap.icon_headline_normal,
                         R.mipmap.icon_headline_light
@@ -128,7 +143,8 @@ class MainActivity : AppCompatActivity() {
      * 处理添加分割线，其实插入的也是BlockImageSpan
      */
     private fun handleAddDivider() {
-        val blockImageSpanVm = BlockImageSpanVm(ImageSpanType.DIVIDER, getEditTextWidthWithoutPadding(), imageMaxHeight, null)
+        val blockImageSpanVm =
+                BlockImageSpanVm(DividerVm(), getEditTextWidthWithoutPadding(), imageMaxHeight)
         richEditText.insertBlockImage(R.mipmap.image_divider_line, blockImageSpanVm, null)
     }
 
@@ -145,13 +161,35 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == GET_PHOTO_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             // 相册图片返回
             val selectedImageUri = data.data ?: return
-            val realImagePath = ImageUtil.getRealPathFromUri(this, selectedImageUri) ?: return
-            val imageVm = ImageVm(realImagePath, "2")
-            val blockImageSpanVm = BlockImageSpanVm(ImageSpanType.IMAGE, imageWidth, imageMaxHeight, imageVm)
-            richEditText.insertBlockImage(selectedImageUri, blockImageSpanVm) {
-                val image = it.spanObject as ImageVm
-                Toast.makeText(this, "短按了图片-当前图片路径：${image.path}", Toast.LENGTH_SHORT).show()
+            val realImagePath = FileUtil.getFileRealPath(this, selectedImageUri) ?: return
+            val fileType = FileUtil.getFileType(realImagePath) ?: return
+            var blockImageSpanVm = BlockImageSpanVm<IBlockImageSpanObtainObject>(this, null)
+            when (fileType) {
+                FileTypeEnum.IMAGE -> {
+                    val imageVm = ImageVm(realImagePath, "2")
+//                    blockImageSpanVm = BlockImageSpanVm(this, imageVm) // 不指定宽高，使用组件默认宽高
+                    blockImageSpanVm = BlockImageSpanVm(imageVm, imageWidth, imageMaxHeight) // 指定宽高
+                }
+                FileTypeEnum.VIDEO -> {
+                    // 插入视频封面
+                    val videoVm = VideoVm(realImagePath, "3")
+                    blockImageSpanVm = BlockImageSpanVm(this, videoVm, true) // 不指定宽高，使用组件默认宽高
+//                    blockImageSpanVm = BlockImageSpanVm(videoVm, imageWidth, imageMaxHeight) // 指定宽高
+                }
             }
+
+            richEditText.insertBlockImage(selectedImageUri, blockImageSpanVm) { blockImageSpan ->
+                val spanObtainObject = blockImageSpan.blockImageSpanVm.spanObject
+                when (spanObtainObject) {
+                    is ImageVm -> {
+                        Toast.makeText(this, "短按了图片-当前图片路径：${spanObtainObject.path}", Toast.LENGTH_SHORT).show()
+                    }
+                    is VideoVm -> {
+                        Toast.makeText(this, "短按了图片-当前图片路径：${spanObtainObject.path}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
         }
     }
 

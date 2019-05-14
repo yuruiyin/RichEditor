@@ -15,7 +15,8 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.SOURCE)
 @StringDef({RichTypeEnum.BOLD, RichTypeEnum.ITALIC, RichTypeEnum.STRIKE_THROUGH, RichTypeEnum.UNDERLINE,
-    RichTypeEnum.HEADLINE, RichTypeEnum.BLOCK_QUOTE})
+    RichTypeEnum.INLINE_IMAGE_SPAN, RichTypeEnum.BLOCK_HEADLINE, RichTypeEnum.BLOCK_QUOTE,
+    RichTypeEnum.BLOCK_NORMAL_TEXT})
 public @interface RichTypeEnum {
 
     /**
@@ -39,13 +40,23 @@ public @interface RichTypeEnum {
     String UNDERLINE = "underline";
 
     /**
-     * 标题
+     * 行内ImageSpan
      */
-    String HEADLINE = "headline";
+    String INLINE_IMAGE_SPAN = "inline_image_span";
 
     /**
-     * 引用
+     * 段落标题
+     */
+    String BLOCK_HEADLINE = "block_headline";
+
+    /**
+     * 段落引用
      */
     String BLOCK_QUOTE = "block_quote";
+
+    /**
+     * 段落普通文本（但是可能包含行内样式）
+     */
+    String BLOCK_NORMAL_TEXT = "block_normal_text";
 
 }
