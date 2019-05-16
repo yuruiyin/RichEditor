@@ -14,13 +14,18 @@ import java.lang.annotation.RetentionPolicy;
  */
 
 @Retention(RetentionPolicy.SOURCE)
-@StringDef({FileTypeEnum.IMAGE, FileTypeEnum.VIDEO, FileTypeEnum.AUDIO})
+@StringDef({FileTypeEnum.STATIC_IMAGE, FileTypeEnum.VIDEO, FileTypeEnum.AUDIO})
 public @interface FileTypeEnum {
 
     /**
-     * 图片
+     * 静态图, 包括png，jpg等
      */
-    String IMAGE = "image";
+    String STATIC_IMAGE = "static_image";
+
+    /**
+     * 动图
+     */
+    String GIF = "gif";
 
     /**
      * 视频

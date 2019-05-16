@@ -165,7 +165,7 @@ class MainActivity : AppCompatActivity() {
             val fileType = FileUtil.getFileType(realImagePath) ?: return
             var blockImageSpanVm = BlockImageSpanVm<IBlockImageSpanObtainObject>(this, null)
             when (fileType) {
-                FileTypeEnum.IMAGE -> {
+                FileTypeEnum.STATIC_IMAGE, FileTypeEnum.GIF -> {
                     val imageVm = ImageVm(realImagePath, "2")
 //                    blockImageSpanVm = BlockImageSpanVm(this, imageVm) // 不指定宽高，使用组件默认宽高
                     blockImageSpanVm = BlockImageSpanVm(imageVm, imageWidth, imageMaxHeight) // 指定宽高
@@ -173,8 +173,8 @@ class MainActivity : AppCompatActivity() {
                 FileTypeEnum.VIDEO -> {
                     // 插入视频封面
                     val videoVm = VideoVm(realImagePath, "3")
-                    blockImageSpanVm = BlockImageSpanVm(this, videoVm, true) // 不指定宽高，使用组件默认宽高
-//                    blockImageSpanVm = BlockImageSpanVm(videoVm, imageWidth, imageMaxHeight) // 指定宽高
+//                    blockImageSpanVm = BlockImageSpanVm(this, videoVm) // 不指定宽高，使用组件默认宽高
+                    blockImageSpanVm = BlockImageSpanVm(videoVm, imageWidth, imageMaxHeight) // 指定宽高
                 }
             }
 
@@ -191,6 +191,16 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop")
     }
 
 }

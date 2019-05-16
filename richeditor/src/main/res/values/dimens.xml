@@ -25,4 +25,7 @@
     <dimen name="rich_editor_image_width">120dp</dimen>
     <dimen name="rich_editor_image_max_height">640dp</dimen>
 
+    <!-- 图片类型（gif or长图）文字大小  -->
+    <dimen name="rich_editor_image_type_text_size">10dp</dimen>
+
 </resources>

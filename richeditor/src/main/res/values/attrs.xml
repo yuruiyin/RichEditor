@@ -2,7 +2,16 @@
 <resources>
 
     <declare-styleable name="RichEditText">
-        <attr name="re_video_mark_resource_id" format="reference" />
+        <!-- 是否显示视频标识图标 -->
+        <attr name="editor_show_video_mark" format="boolean"/>
+        <!-- 视频图标资源id -->
+        <attr name="editor_video_mark_resource_id" format="reference"/>
+        <!-- 是否显示gif标识图标 -->
+        <attr name="editor_show_gif_mark" format="boolean"/>
+        <!-- 是否显示长图标识 -->
+        <attr name="editor_show_long_image_mark" format="boolean"/>
+        <!-- 图片和视频圆角大小 -->
+        <attr name="editor_image_radius" format="dimension"/>
     </declare-styleable>
 
 </resources>

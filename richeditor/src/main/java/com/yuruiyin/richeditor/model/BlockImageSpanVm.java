@@ -13,12 +13,40 @@ import com.yuruiyin.richeditor.R;
  */
 public class BlockImageSpanVm<T extends IBlockImageSpanObtainObject> {
 
+    /**
+     * 图片宽
+     */
     private int width;
+
+    /**
+     * 图片最大高度
+     */
     private int maxHeight;
+
+    /**
+     * BlockImageSpan中包含的用户自定义的对象
+     */
     private T spanObject;
 
-    // 插入的ImageSpan是否为视频封面，用来确定是否显示视频图标标识
+    /**
+     * 是否是视频
+     */
     private boolean isVideo;
+
+    /**
+     * 是否gif
+     */
+    private boolean isGif;
+
+    /**
+     * 是否长图
+     */
+    private boolean isLong;
+
+    /**
+     * 是否为相册图片（用于判断是否给ImageSpan添加圆角）
+     */
+    private boolean isPhoto;
 
     public BlockImageSpanVm(Context context, T spanObject) {
         this.width = (int) context.getResources().getDimension(R.dimen.rich_editor_image_width);
@@ -26,20 +54,10 @@ public class BlockImageSpanVm<T extends IBlockImageSpanObtainObject> {
         this.spanObject = spanObject;
     }
 
-    public BlockImageSpanVm(Context context, T spanObject, boolean isVideo) {
-        this(context, spanObject);
-        this.isVideo = isVideo;
-    }
-
     public BlockImageSpanVm(T spanObject, int width, int maxHeight) {
         this.width = width;
         this.maxHeight = maxHeight;
         this.spanObject = spanObject;
-    }
-
-    public BlockImageSpanVm(T spanObject, int width, int maxHeight, boolean isVideo) {
-        this(spanObject, width, maxHeight);
-        this.isVideo = isVideo;
     }
 
     public int getWidth() {
@@ -70,7 +88,31 @@ public class BlockImageSpanVm<T extends IBlockImageSpanObtainObject> {
         return isVideo;
     }
 
-    public void setVideo(boolean video) {
-        isVideo = video;
+    public void setVideo(boolean isVideo) {
+        this.isVideo = isVideo;
+    }
+
+    public boolean isGif() {
+        return isGif;
+    }
+
+    public void setGif(boolean isGif) {
+        this.isGif = isGif;
+    }
+
+    public boolean isLong() {
+        return isLong;
+    }
+
+    public void setLong(boolean isLong) {
+        this.isLong = isLong;
+    }
+
+    public boolean isPhoto() {
+        return isPhoto;
+    }
+
+    public void setPhoto(boolean isPhoto) {
+        this.isPhoto = isPhoto;
     }
 }

@@ -16,16 +16,20 @@ import android.support.annotation.NonNull;
 import android.support.v7.content.res.AppCompatResources;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.ImageView;
-
+import android.widget.TextView;
 import com.hanks.lineheightedittext.LineHeightEditText;
+import com.makeramen.roundedimageview.RoundedImageView;
 import com.yuruiyin.richeditor.callback.OnImageClickListener;
+import com.yuruiyin.richeditor.config.AppConfig;
 import com.yuruiyin.richeditor.enumtype.FileTypeEnum;
+import com.yuruiyin.richeditor.enumtype.ImageTypeMarkEnum;
 import com.yuruiyin.richeditor.ext.LongClickableLinkMovementMethod;
 import com.yuruiyin.richeditor.model.BlockImageSpanVm;
 import com.yuruiyin.richeditor.model.RichEditorBlock;
@@ -36,7 +40,6 @@ import com.yuruiyin.richeditor.utils.ViewUtil;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,8 +61,19 @@ public class RichEditText extends LineHeightEditText {
     private int imageSpanPaddingRight;
     // 内部限制的图片最大高度
     private int internalImageMaxHeight;
+
+    // 是否显示视频标识
+    private boolean gIsShowVideoMark;
     // 视频标识图标资源id
-    private int videoIconResourceId;
+    private int gVideoMarkResourceId;
+
+    // 是否显示gif标识
+    private boolean gIsShowGifMark;
+    // 是否显示长图标识
+    private boolean gIsShowLongImageMark;
+
+    // 图片和视频封面的圆角大小
+    private int gImageRadius;
 
     /**
      * EditText的宽度
@@ -124,7 +138,14 @@ public class RichEditText extends LineHeightEditText {
     private void init(Context context, AttributeSet attrs) {
         if (attrs != null) {
             TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.RichEditText);
-            videoIconResourceId = ta.getResourceId(R.styleable.RichEditText_re_video_mark_resource_id, R.drawable.default_video_icon);
+            gIsShowVideoMark = ta.getBoolean(R.styleable.RichEditText_editor_show_video_mark, true);
+            gVideoMarkResourceId = ta.getResourceId(R.styleable.RichEditText_editor_video_mark_resource_id, R.drawable.default_video_icon);
+            gIsShowGifMark = ta.getBoolean(R.styleable.RichEditText_editor_show_gif_mark, true);
+            gIsShowLongImageMark = ta.getBoolean(R.styleable.RichEditText_editor_show_long_image_mark, true);
+
+            DisplayMetrics dm = context.getResources().getDisplayMetrics();
+            gImageRadius = (int) ta.getDimension(R.styleable.RichEditText_editor_image_radius, 0);
+
             ta.recycle();
         }
 
@@ -155,6 +176,52 @@ public class RichEditText extends LineHeightEditText {
         mRichUtils.initStyleButton(styleBtnVm);
     }
 
+    /**
+     * 控制视频、gif、长图标识的显示和隐藏
+     *
+     * @param imageItemView    包裹图标的外层View
+     * @param blockImageSpanVm 相关实体
+     */
+    private void setMarkIconVisibility(View imageItemView, BlockImageSpanVm blockImageSpanVm) {
+        ImageView ivVideoIcon = imageItemView.findViewById(R.id.ivVideoIcon);
+        TextView tvGifOrLongImageMark = imageItemView.findViewById(R.id.tvGifOrLongImageMark);
+
+        // 控制视频、gif、长图标识图标的显示和隐藏
+        ivVideoIcon.setVisibility(GONE);
+        tvGifOrLongImageMark.setVisibility(GONE);
+
+        // 处理视频
+        if (blockImageSpanVm.isVideo() && gIsShowVideoMark && gVideoMarkResourceId != 0) {
+            // 视频封面，显示视频标识
+            Drawable videoIconDrawable = AppCompatResources.getDrawable(mContext, gVideoMarkResourceId);
+            if (videoIconDrawable != null) {
+                ivVideoIcon.setVisibility(VISIBLE);
+                ivVideoIcon.setImageDrawable(videoIconDrawable);
+                ViewGroup.LayoutParams layoutParams = ivVideoIcon.getLayoutParams();
+                layoutParams.width = videoIconDrawable.getIntrinsicWidth();
+                layoutParams.height = videoIconDrawable.getIntrinsicHeight();
+            }
+            return;
+        }
+
+
+        // 处理长图
+        if (blockImageSpanVm.isLong() && gIsShowLongImageMark) {
+            // 长图，显示长图标识
+            tvGifOrLongImageMark.setVisibility(VISIBLE);
+            tvGifOrLongImageMark.setText(ImageTypeMarkEnum.LONG);
+            return;
+        }
+
+        // 处理gif
+        if (blockImageSpanVm.isGif() && gIsShowGifMark) {
+            // gif, 显示gif标识
+            tvGifOrLongImageMark.setVisibility(VISIBLE);
+            tvGifOrLongImageMark.setText(ImageTypeMarkEnum.GIF);
+        }
+
+    }
+
     public void insertBlockImage(Drawable drawable, @NonNull BlockImageSpanVm blockImageSpanVm,
                                  OnImageClickListener onImageClickListener) {
         if (!(mContext instanceof Activity)) {
@@ -164,6 +231,7 @@ public class RichEditText extends LineHeightEditText {
 
         int originWidth = drawable.getIntrinsicWidth();
         int originHeight = drawable.getIntrinsicHeight();
+        blockImageSpanVm.setLong(originHeight > originWidth * 3);
 
         // 这里减去一个值是为了防止部分手机（如华为Mate-10）ImageSpan右侧超出编辑区的时候，会导致ImageSpan被重复绘制的问题
         int editTextWidth = getWidthWithoutPadding();
@@ -173,28 +241,23 @@ public class RichEditText extends LineHeightEditText {
             ? internalImageMaxHeight : blockImageSpanVm.getMaxHeight();
         int resImageHeight = (int) (originHeight * 1.0 / originWidth * resImageWidth);
         resImageHeight = resImageHeight > imageMaxHeight ? imageMaxHeight : resImageHeight;
+        // 控制显示出来的图片的高度不会大于宽度的3倍
+        double maxHeightWidthRadio = AppConfig.IMAGE_MAX_HEIGHT_WIDTH_RATIO;
+        resImageHeight = resImageHeight > resImageWidth * maxHeightWidthRadio
+            ? (int) (resImageWidth * maxHeightWidthRadio)
+            : resImageHeight;
 
         Activity activity = (Activity) mContext;
         View imageItemView = activity.getLayoutInflater().inflate(R.layout.rich_editor_image, null);
-        ImageView imageView = imageItemView.findViewById(R.id.image);
-        ImageView ivVideoIcon = imageItemView.findViewById(R.id.ivVideoIcon);
+        RoundedImageView imageView = imageItemView.findViewById(R.id.image);
         imageView.setImageDrawable(drawable);
-
-        if (blockImageSpanVm.isVideo() && videoIconResourceId != 0) {
-            // 视频封面
-            Drawable videoIconDrawable = AppCompatResources.getDrawable(mContext, videoIconResourceId);
-            if (videoIconDrawable != null) {
-                ivVideoIcon.setVisibility(VISIBLE);
-                ivVideoIcon.setImageDrawable(videoIconDrawable);
-                ViewGroup.LayoutParams layoutParams = ivVideoIcon.getLayoutParams();
-                layoutParams.width = videoIconDrawable.getIntrinsicWidth();
-                layoutParams.height = videoIconDrawable.getIntrinsicHeight();
-            } else {
-                ivVideoIcon.setVisibility(GONE);
-            }
-        } else {
-            ivVideoIcon.setVisibility(GONE);
+        if (blockImageSpanVm.isPhoto() || blockImageSpanVm.isVideo()) {
+            // 相册图片或视频设置圆角
+            imageView.setCornerRadius(gImageRadius);
         }
+
+        // 控制视频、gif、长图标识的显示和隐藏
+        setMarkIconVisibility(imageItemView, blockImageSpanVm);
 
         ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
         layoutParams.width = resImageWidth;
@@ -238,8 +301,9 @@ public class RichEditText extends LineHeightEditText {
 
     /**
      * 根据uri插入图片或视频封面
-     * @param uri 文件uri
-     * @param blockImageSpanVm 相关实体
+     *
+     * @param uri                  文件uri
+     * @param blockImageSpanVm     相关实体
      * @param onImageClickListener 图片点击事件监听器
      */
     public void insertBlockImage(Uri uri, @NonNull BlockImageSpanVm blockImageSpanVm,
@@ -271,11 +335,20 @@ public class RichEditText extends LineHeightEditText {
             case FileTypeEnum.VIDEO:
                 Bitmap coverBitmap = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Video.Thumbnails.MINI_KIND);
                 blockImageSpanVm.setVideo(true);
+                blockImageSpanVm.setGif(false);
                 insertBlockImage(coverBitmap, blockImageSpanVm, onImageClickListener);
                 break;
-            case FileTypeEnum.IMAGE:
+            case FileTypeEnum.STATIC_IMAGE:
+            case FileTypeEnum.GIF:
                 File file = new File(filePath);
                 blockImageSpanVm.setVideo(false);
+                if (FileTypeEnum.GIF.equals(fileType)) {
+                    blockImageSpanVm.setGif(true);
+                } else {
+                    blockImageSpanVm.setGif(false);
+                }
+                // 通过uri或path调用的可以断定为相册图片或视频，有添加圆角的需求
+                blockImageSpanVm.setPhoto(true);
                 insertBlockImageInternal(Uri.fromFile(file), blockImageSpanVm, onImageClickListener);
                 break;
             default:
@@ -307,6 +380,7 @@ public class RichEditText extends LineHeightEditText {
 
     /**
      * 获取编辑器中的内容
+     *
      * @return 编辑的内容
      */
     public List<RichEditorBlock> getContent() {
@@ -385,4 +459,35 @@ public class RichEditText extends LineHeightEditText {
         return mRichInputConnection;
     }
 
+    public int getVideoMarkResourceId() {
+        return gVideoMarkResourceId;
+    }
+
+    public void setVideoMarkResourceId(int videoMarkResourceId) {
+        this.gVideoMarkResourceId = videoMarkResourceId;
+    }
+
+    public boolean isShowVideoMark() {
+        return gIsShowVideoMark;
+    }
+
+    public void setIsShowVideoMark(boolean isShowVideoMark) {
+        this.gIsShowVideoMark = isShowVideoMark;
+    }
+
+    public boolean isShowGifMark() {
+        return gIsShowGifMark;
+    }
+
+    public void setIsShowGifMark(boolean isShowGifMark) {
+        this.gIsShowGifMark = isShowGifMark;
+    }
+
+    public boolean isShowLongImageMark() {
+        return gIsShowLongImageMark;
+    }
+
+    public void setIsShowLongImageMark(boolean isShowLongImageMark) {
+        this.gIsShowLongImageMark = isShowLongImageMark;
+    }
 }

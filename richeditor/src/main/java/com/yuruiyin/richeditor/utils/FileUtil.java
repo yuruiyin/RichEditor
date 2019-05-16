@@ -28,30 +28,32 @@ public class FileUtil {
 
     public static String getFileType(String path) {
         if (TextUtils.isEmpty(path)) {
-            return FileTypeEnum.IMAGE;
+            return FileTypeEnum.STATIC_IMAGE;
         }
 
         if (path.endsWith(".mp4") || path.endsWith(".avi")
             || path.endsWith(".3gpp") || path.endsWith(".3gp") || path.startsWith(".mov")) {
             return FileTypeEnum.VIDEO;
         } else if (path.endsWith(".PNG") || path.endsWith(".png") || path.endsWith(".jpeg")
-            || path.endsWith(".gif") || path.endsWith(".GIF") || path.endsWith(".jpg")
+            || path.endsWith(".jpg")
             || path.endsWith(".webp") || path.endsWith(".WEBP") || path.endsWith(".JPEG")
             || path.endsWith(".bmp")) {
-            return FileTypeEnum.IMAGE;
+            return FileTypeEnum.STATIC_IMAGE;
+        } else if (path.endsWith(".gif") || path.endsWith(".GIF")) {
+            return FileTypeEnum.GIF;
         } else if (path.endsWith(".mp3") || path.endsWith(".amr")
             || path.endsWith(".aac") || path.endsWith(".war")
             || path.endsWith(".flac") || path.endsWith(".lamr")) {
             return FileTypeEnum.AUDIO;
         }
 
-        return FileTypeEnum.IMAGE;
+        return FileTypeEnum.STATIC_IMAGE;
     }
 
     public static String getFileType(File file) {
         if (file == null) {
             Log.e(TAG, "file is null");
-            return FileTypeEnum.IMAGE;
+            return FileTypeEnum.STATIC_IMAGE;
         }
 
         return getFileType(file.getAbsolutePath());
@@ -60,13 +62,13 @@ public class FileUtil {
     public static String getFileType(Context context, Uri uri) {
         if (uri == null) {
             Log.e(TAG, "uri is null");
-            return FileTypeEnum.IMAGE;
+            return FileTypeEnum.STATIC_IMAGE;
         }
 
         String path = getFileRealPath(context, uri);
         if (TextUtils.isEmpty(path)) {
             Log.e(TAG, "path is null");
-            return FileTypeEnum.IMAGE;
+            return FileTypeEnum.STATIC_IMAGE;
         }
 
         return getFileType(path);
@@ -74,8 +76,9 @@ public class FileUtil {
 
     /**
      * 获取文件真实路径
+     *
      * @param context 上下文
-     * @param uri 文件uri
+     * @param uri     文件uri
      * @return 文件真实路径
      */
     public static String getFileRealPath(Context context, Uri uri) {

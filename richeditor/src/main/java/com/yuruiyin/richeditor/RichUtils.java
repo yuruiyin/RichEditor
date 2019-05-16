@@ -35,7 +35,7 @@ public class RichUtils {
 
     private static final String TAG = "RichUtils";
 
-    private static final String IMAGE_SPAN_PLACEHOLDER = "image_span_placeholder";
+    private static final String IMAGE_SPAN_PLACEHOLDER = "[image]";
 
     private RichEditText mRichEditText;
 

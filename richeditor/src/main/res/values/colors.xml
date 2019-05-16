@@ -7,4 +7,10 @@
     <!-- 引用背景色 -->
     <color name="rich_editor_quote_bg_color">#fff3f3f3</color>
 
+    <!-- 图片类型(gif或长图标识)区域背景色 -->
+    <color name="rich_editor_image_type_bg_color">#4d000000</color>
+
+    <!-- 图片类型(gif或长图标识)文字颜色 -->
+    <color name="rich_editor_image_type_text_color">#ffffffff</color>
+
 </resources>

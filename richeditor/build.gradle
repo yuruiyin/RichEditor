@@ -37,4 +37,7 @@ dependencies {
 
     //可以解决行间距异常的EditText
     api 'com.hanks:lineheightedittext-library:1.0'
+
+    // 圆角图片
+    implementation 'com.makeramen:roundedimageview:2.3.0'
 }
