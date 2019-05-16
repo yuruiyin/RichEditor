@@ -31,7 +31,7 @@ allprojects {
 Step 2. Add the dependency in your app build.gradle:
 ```groovy
 dependencies {
-	implementation 'com.github.yuruiyin:RichEditor:0.0.1'
+	implementation 'com.github.yuruiyin:RichEditor:0.0.2'
 }
 ```
 
@@ -172,4 +172,4 @@ dependencies {
 ```
 
 #### 4) 插入自定义布局
-
+TODO

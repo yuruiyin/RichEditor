@@ -363,7 +363,7 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this, "短按了图片-当前图片路径：${spanObtainObject.path}", Toast.LENGTH_SHORT).show()
                 }
                 is VideoVm -> {
-                    Toast.makeText(this, "短按了图片-当前图片路径：${spanObtainObject.path}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "短按了视频-当前视频路径：${spanObtainObject.path}", Toast.LENGTH_SHORT).show()
                 }
             }
         }

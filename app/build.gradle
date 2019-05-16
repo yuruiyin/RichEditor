@@ -36,13 +36,13 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
-    api project(':richeditor')
+//    api project(':richeditor')
 
 //    implementation 'com.hanks:lineheightedittext-library:1.0'
 
     implementation 'com.google.code.gson:gson:2.8.5'
 
-//    implementation 'com.github.yuruiyin:RichEditor:0.0.1'
+    implementation 'com.github.yuruiyin:RichEditor:0.0.2'
 
     implementation 'com.google.android:flexbox:1.0.0'
 }
