@@ -63,8 +63,8 @@ public class RichUtils {
         //为了兼容模拟器
         mRichEditText.setOnKeyListener((v, keyCode, event) -> {
             if (KeyEvent.KEYCODE_DEL == event.getKeyCode()
-                && event.getAction() == KeyEvent.ACTION_DOWN
-                && !SoftKeyboardUtil.isSoftShowing(mActivity)) {
+                    && event.getAction() == KeyEvent.ACTION_DOWN
+                    && !SoftKeyboardUtil.isSoftShowing(mActivity)) {
                 //监听到删除键但是软键盘没弹出，可以基本断定是用模拟器
                 // TODO 也存在模拟器也会弹出软键盘的
                 return handleDeleteKey();
@@ -91,6 +91,52 @@ public class RichUtils {
     }
 
     /**
+     * 插入整段标题或引用文本（可能包含行内样式）
+     * 使用场景：如恢复草稿
+     *
+     * @param blockType 文本段落类型
+     * @param content 文本内容
+     * @param inlineStyleEntities 行内样式列表
+     */
+    void insertBlockSpanText(String blockType, SpannableString content, List<RichEditorBlock.InlineStyleEntity> inlineStyleEntities) {
+        Class blockSpanClass = getSpanClassFromType(blockType);
+        IBlockSpan blockSpan = getBlockSpan(blockSpanClass);
+        int spanFlag = getBlockSpanFlag(blockType);
+        content.setSpan(blockSpan, 0, content.length(), spanFlag);
+        insertNormalTextBlock(content, inlineStyleEntities);
+    }
+
+    /**
+     * 插入整段普通文本（可能包含行内样式）
+     * 使用场景：如恢复草稿
+     *
+     * @param content   文本内容
+     * @param inlineStyleEntities 行内样式列表
+     */
+    void insertNormalTextBlock(SpannableString content, List<RichEditorBlock.InlineStyleEntity> inlineStyleEntities) {
+        int cursorPos = mRichEditText.getSelectionStart();
+        if (inlineStyleEntities == null || inlineStyleEntities.isEmpty()) {
+            insertStringIntoEditText(content, cursorPos);
+            return;
+        }
+
+        for (RichEditorBlock.InlineStyleEntity inlineStyleEntity : inlineStyleEntities) {
+            String inlineType = inlineStyleEntity.getInlineType();
+            int offset = inlineStyleEntity.getOffset();
+            int length = inlineStyleEntity.getLength();
+            if (RichTypeEnum.INLINE_IMAGE_SPAN.equals(inlineType)) {
+                // TODO
+                continue;
+            }
+
+            Class spanClass = getSpanClassFromType(inlineType);
+            IInlineSpan inlineSpan = getInlineStyleSpan(spanClass);
+            content.setSpan(inlineSpan, offset, offset + length, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+        }
+        insertStringIntoEditText(content, cursorPos);
+    }
+
+    /**
      * 在光标位置插入段落ImageSpan（如图片、视频封面、自定义view等）
      *
      * @param blockImageSpan 段落ImageSpan
@@ -100,8 +146,10 @@ public class RichUtils {
             return;
         }
 
-        // 在ImageSpan前面都插入一空行
-        insertStringIntoEditText("\n", mRichEditText.getSelectionStart());
+        // 只有正常编辑器插入的ImageSpan才在前面都插入一空行，否则从草稿插入的不再另外加一空行
+        if (!blockImageSpan.getBlockImageSpanVm().isFromDraft()) {
+            insertStringIntoEditText("\n", mRichEditText.getSelectionStart());
+        }
 
         //将bitmap插入到editText中
         SpannableString imageSpannableString = new SpannableString(IMAGE_SPAN_PLACEHOLDER);
@@ -116,8 +164,8 @@ public class RichUtils {
      * 获取单个行内样式实体
      */
     private RichEditorBlock.InlineStyleEntity getInlineStyleEntity(
-        String inlineType, int spanStart, int spanEnd, int blockStart, int blockEnd,
-        @Nullable IInlineImageSpanObtainObject inlineImageSpanObtainObject
+            String inlineType, int spanStart, int spanEnd, int blockStart, int blockEnd,
+            @Nullable IInlineImageSpanObtainObject inlineImageSpanObtainObject
     ) {
         RichEditorBlock.InlineStyleEntity inlineStyleEntity = new RichEditorBlock.InlineStyleEntity();
         inlineStyleEntity.setInlineType(inlineType);
@@ -148,28 +196,28 @@ public class RichUtils {
         InlineImageSpan[] inlineImageSpans = editable.getSpans(blockStart, blockEnd, InlineImageSpan.class);
         for (InlineImageSpan inlineImageSpan : inlineImageSpans) {
             inlineStyleEntityList.add(
-                getInlineStyleEntity(
-                    RichTypeEnum.INLINE_IMAGE_SPAN,
-                    editable.getSpanStart(inlineImageSpan),
-                    editable.getSpanEnd(inlineImageSpan),
-                    blockStart,
-                    blockEnd,
-                    inlineImageSpan.getInlineImageSpanVm().getSpanObject()
-                )
+                    getInlineStyleEntity(
+                            RichTypeEnum.INLINE_IMAGE_SPAN,
+                            editable.getSpanStart(inlineImageSpan),
+                            editable.getSpanEnd(inlineImageSpan),
+                            blockStart,
+                            blockEnd,
+                            inlineImageSpan.getInlineImageSpanVm().getSpanObject()
+                    )
             );
         }
 
         IInlineSpan[] inlineSpans = editable.getSpans(blockStart, blockEnd, IInlineSpan.class);
         for (IInlineSpan inlineSpan : inlineSpans) {
             inlineStyleEntityList.add(
-                getInlineStyleEntity(
-                    inlineSpan.getType(),
-                    editable.getSpanStart(inlineSpan),
-                    editable.getSpanEnd(inlineSpan),
-                    blockStart,
-                    blockEnd,
-                    null
-                )
+                    getInlineStyleEntity(
+                            inlineSpan.getType(),
+                            editable.getSpanStart(inlineSpan),
+                            editable.getSpanEnd(inlineSpan),
+                            blockStart,
+                            blockEnd,
+                            null
+                    )
             );
         }
 
@@ -177,9 +225,9 @@ public class RichUtils {
     }
 
     private RichEditorBlock getRichEditorBlock(
-        @RichTypeEnum String blockType, String text,
-        IBlockImageSpanObtainObject blockImageSpanObtainObject,
-        List<RichEditorBlock.InlineStyleEntity> inlineStyleEntityList
+            @RichTypeEnum String blockType, String text,
+            IBlockImageSpanObtainObject blockImageSpanObtainObject,
+            List<RichEditorBlock.InlineStyleEntity> inlineStyleEntityList
     ) {
         RichEditorBlock richEditorBlock = new RichEditorBlock();
         richEditorBlock.setBlockType(blockType);
@@ -224,9 +272,9 @@ public class RichUtils {
                 BlockImageSpan blockImageSpan = blockImageSpans[0];
                 IBlockImageSpanObtainObject spanObtainObject = blockImageSpan.getBlockImageSpanVm().getSpanObject();
                 richEditorBlockList.add(
-                    getRichEditorBlock(
-                        spanObtainObject.getType(), null, spanObtainObject, null
-                    )
+                        getRichEditorBlock(
+                                spanObtainObject.getType(), null, spanObtainObject, null
+                        )
                 );
                 continue;
             }
@@ -244,9 +292,9 @@ public class RichUtils {
             if (blockSpans.length > 0) {
                 IBlockSpan blockSpan = blockSpans[0];
                 richEditorBlockList.add(
-                    getRichEditorBlock(
-                        blockSpan.getType(), blockTextContent, null, getInlineStyleEntities(blockStart, enterCharPos)
-                    )
+                        getRichEditorBlock(
+                                blockSpan.getType(), blockTextContent, null, getInlineStyleEntities(blockStart, enterCharPos)
+                        )
                 );
                 continue;
             }
@@ -255,9 +303,9 @@ public class RichUtils {
             // 剩下的就是普通文本（可能包含行内样式）
 
             richEditorBlockList.add(
-                getRichEditorBlock(
-                    RichTypeEnum.BLOCK_NORMAL_TEXT, blockTextContent, null, getInlineStyleEntities(blockStart, enterCharPos)
-                )
+                    getRichEditorBlock(
+                            RichTypeEnum.BLOCK_NORMAL_TEXT, blockTextContent, null, getInlineStyleEntities(blockStart, enterCharPos)
+                    )
             );
         }
 
@@ -414,12 +462,12 @@ public class RichUtils {
         boolean isStartInclusive = false;  // 是否包括左端点
         boolean isEndInclusive = false;    // 是否包括右端点
         if (mergedLeftSpanFlag == Spanned.SPAN_INCLUSIVE_EXCLUSIVE
-            || mergedLeftSpanFlag == Spanned.SPAN_INCLUSIVE_INCLUSIVE) {
+                || mergedLeftSpanFlag == Spanned.SPAN_INCLUSIVE_INCLUSIVE) {
             isStartInclusive = true;
         }
 
         if (mergedRightSpanFlag == Spanned.SPAN_INCLUSIVE_INCLUSIVE
-            || mergedRightSpanFlag == Spanned.SPAN_EXCLUSIVE_INCLUSIVE) {
+                || mergedRightSpanFlag == Spanned.SPAN_EXCLUSIVE_INCLUSIVE) {
             isEndInclusive = true;
         }
 
@@ -447,8 +495,8 @@ public class RichUtils {
     private void mergeContinuousInlineSpan(int leftPos, int rightPos, Class spanClazz) {
         Editable editable = mRichEditText.getEditableText();
         if (leftPos < 0 || leftPos > editable.length()
-            || rightPos < 0 || rightPos > editable.length()
-            || leftPos > rightPos) {
+                || rightPos < 0 || rightPos > editable.length()
+                || leftPos > rightPos) {
             return;
         }
 
@@ -572,7 +620,7 @@ public class RichUtils {
 
         styleBtnVm.setLight(!styleBtnVm.isLight()); // 状态取反
         changeStyleBtnImage(styleBtnVm.getIvButton(),
-            styleBtnVm.isLight() ? styleBtnVm.getLightResId() : styleBtnVm.getNormalResId());
+                styleBtnVm.isLight() ? styleBtnVm.getLightResId() : styleBtnVm.getNormalResId());
 
         if (!styleBtnVm.isInlineType()) {
             // 段落样式（标题、引用）
@@ -779,10 +827,10 @@ public class RichUtils {
             if (spanStart < cursorPos && spanEnd > cursorPos) {
                 isLight = true;
             } else if (spanStart == cursorPos
-                && (spanFlag == Spanned.SPAN_INCLUSIVE_INCLUSIVE || spanFlag == Spanned.SPAN_INCLUSIVE_EXCLUSIVE)) {
+                    && (spanFlag == Spanned.SPAN_INCLUSIVE_INCLUSIVE || spanFlag == Spanned.SPAN_INCLUSIVE_EXCLUSIVE)) {
                 isLight = true;
             } else if (spanEnd == cursorPos
-                && (spanFlag == Spanned.SPAN_INCLUSIVE_INCLUSIVE || spanFlag == Spanned.SPAN_EXCLUSIVE_INCLUSIVE)) {
+                    && (spanFlag == Spanned.SPAN_INCLUSIVE_INCLUSIVE || spanFlag == Spanned.SPAN_EXCLUSIVE_INCLUSIVE)) {
                 isLight = true;
             }
         }

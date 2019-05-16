@@ -65,7 +65,7 @@ public class RichTextWatcher implements TextWatcher {
 
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        isDeleteEnterStr = after == 0 && s.charAt(start) == '\n';
+        isDeleteEnterStr = after == 0 && s.length() > 0 && s.charAt(start) == '\n';
         beforeEditContentLen = s.length();
         Editable editable = mEditText.getText();
         int curPos = mEditText.getSelectionStart();
@@ -92,7 +92,9 @@ public class RichTextWatcher implements TextWatcher {
     public void afterTextChanged(Editable s) {
         if (s.toString().length() < beforeEditContentLen) {
             // 说明删除了字符
-            handleDelete();
+            if (s.length() > 0) {
+                handleDelete();
+            }
             lastEditTextContent = s.toString();
             return;
         }

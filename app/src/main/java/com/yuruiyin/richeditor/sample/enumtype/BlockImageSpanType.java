@@ -32,4 +32,8 @@ public @interface BlockImageSpanType {
      */
     String DIVIDER = "divider";
 
+    /**
+     * 游戏
+     */
+    String GAME = "game";
 }

@@ -10,95 +10,144 @@
     tools:context=".MainActivity"
     >
 
-    <HorizontalScrollView
+    <com.google.android.flexbox.FlexboxLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
         android:background="@color/base_white"
+        app:alignItems="flex_start"
+        app:flexDirection="row"
+        app:flexWrap="wrap"
+        app:justifyContent="flex_start"
         >
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
+        <ImageView
+            android:id="@+id/ivBold"
+            android:layout_width="@dimen/style_button_size"
+            android:layout_height="@dimen/style_button_size"
+            android:padding="7dp"
+            android:src="@mipmap/icon_bold_normal"
+            />
 
-            <ImageView
-                android:id="@+id/ivBold"
-                android:layout_width="@dimen/style_button_size"
-                android:layout_height="@dimen/style_button_size"
-                android:padding="7dp"
-                android:src="@mipmap/icon_bold_normal"
-                />
+        <ImageView
+            android:id="@+id/ivItalic"
+            android:layout_width="@dimen/style_button_size"
+            android:layout_height="@dimen/style_button_size"
+            android:padding="7dp"
+            android:src="@mipmap/icon_italic_normal"
+            />
 
-            <ImageView
-                android:id="@+id/ivItalic"
-                android:layout_width="@dimen/style_button_size"
-                android:layout_height="@dimen/style_button_size"
-                android:padding="7dp"
-                android:src="@mipmap/icon_italic_normal"
-                />
+        <ImageView
+            android:id="@+id/ivStrikeThrough"
+            android:layout_width="@dimen/style_button_size"
+            android:layout_height="@dimen/style_button_size"
+            android:padding="7dp"
+            android:src="@mipmap/icon_strikethrough_normal"
+            />
 
-            <ImageView
-                android:id="@+id/ivStrikeThrough"
-                android:layout_width="@dimen/style_button_size"
-                android:layout_height="@dimen/style_button_size"
-                android:padding="7dp"
-                android:src="@mipmap/icon_strikethrough_normal"
-                />
+        <ImageView
+            android:id="@+id/ivUnderline"
+            android:layout_width="@dimen/style_button_size"
+            android:layout_height="@dimen/style_button_size"
+            android:padding="7dp"
+            android:src="@mipmap/icon_underline_normal"
+            />
 
-            <ImageView
-                android:id="@+id/ivUnderline"
-                android:layout_width="@dimen/style_button_size"
-                android:layout_height="@dimen/style_button_size"
-                android:padding="7dp"
-                android:src="@mipmap/icon_underline_normal"
-                />
+        <ImageView
+            android:id="@+id/ivHeadline"
+            android:layout_width="@dimen/style_button_size"
+            android:layout_height="@dimen/style_button_size"
+            android:padding="7dp"
+            android:src="@mipmap/icon_headline_normal"
+            />
 
-            <ImageView
-                android:id="@+id/ivHeadline"
-                android:layout_width="@dimen/style_button_size"
-                android:layout_height="@dimen/style_button_size"
-                android:padding="7dp"
-                android:src="@mipmap/icon_headline_normal"
-                />
+        <ImageView
+            android:id="@+id/ivBlockquote"
+            android:layout_width="@dimen/style_button_size"
+            android:layout_height="@dimen/style_button_size"
+            android:padding="7dp"
+            android:src="@mipmap/icon_blockquote_normal"
+            />
 
-            <ImageView
-                android:id="@+id/ivBlockquote"
-                android:layout_width="@dimen/style_button_size"
-                android:layout_height="@dimen/style_button_size"
-                android:padding="7dp"
-                android:src="@mipmap/icon_blockquote_normal"
-                />
+        <ImageView
+            android:id="@+id/ivAddImage"
+            android:layout_width="@dimen/style_button_size"
+            android:layout_height="@dimen/style_button_size"
+            android:padding="7dp"
+            android:src="@mipmap/icon_picture"
+            />
 
-            <ImageView
-                android:id="@+id/ivAddImage"
-                android:layout_width="@dimen/style_button_size"
-                android:layout_height="@dimen/style_button_size"
-                android:padding="7dp"
-                android:src="@mipmap/icon_picture"
-                />
+        <ImageView
+            android:id="@+id/ivAddDivider"
+            android:layout_width="@dimen/style_button_size"
+            android:layout_height="@dimen/style_button_size"
+            android:padding="7dp"
+            android:src="@mipmap/icon_divider_normal"
+            />
 
-            <ImageView
-                android:id="@+id/ivAddDivider"
-                android:layout_width="@dimen/style_button_size"
-                android:layout_height="@dimen/style_button_size"
-                android:padding="7dp"
-                android:src="@mipmap/icon_divider_normal"
-                />
+        <ImageView
+            android:id="@+id/ivAddGame"
+            android:layout_width="@dimen/style_button_size"
+            android:layout_height="@dimen/style_button_size"
+            android:padding="7dp"
+            android:src="@mipmap/icon_game"
+            />
 
-            <TextView
-                android:id="@+id/tvCreateJson"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/style_button_size"
-                android:gravity="center"
-                android:padding="7dp"
-                android:text="生成json"
-                />
+        <Button
+            android:id="@+id/btnClearContent"
+            android:layout_width="70dp"
+            android:layout_height="@dimen/style_button_size"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="清空"
+            android:textColor="#ff000000"
+            android:textSize="15dp"
+            />
 
-        </LinearLayout>
+        <Button
+            android:id="@+id/btnSaveDraft"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/style_button_size"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="保存草稿"
+            android:textColor="#ff000000"
+            android:textSize="15dp"
+            />
 
-    </HorizontalScrollView>
+        <Button
+            android:id="@+id/btnRestoreDraft"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/style_button_size"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="恢复草稿"
+            android:textColor="#ff000000"
+            android:textSize="15dp"
+            />
+
+        <Button
+            android:id="@+id/btnClearDraft"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/style_button_size"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="清空草稿"
+            android:textColor="#ff000000"
+            android:textSize="15dp"
+            />
+
+        <Button
+            android:id="@+id/btnCreateJson"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/style_button_size"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="生成json"
+            android:textColor="#ff000000"
+            android:textSize="15dp"
+            />
+
+    </com.google.android.flexbox.FlexboxLayout>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -131,8 +180,11 @@
                 android:textColorHint="#aaaaaa"
                 android:textCursorDrawable="@null"
                 android:textSize="16dp"
-                app:editor_video_mark_resource_id="@mipmap/editor_video_mark_icon"
                 app:editor_image_radius="3dp"
+                app:editor_show_gif_mark="true"
+                app:editor_show_long_image_mark="true"
+                app:editor_show_video_mark="true"
+                app:editor_video_mark_resource_id="@mipmap/editor_video_mark_icon"
                 />
 
             <TextView

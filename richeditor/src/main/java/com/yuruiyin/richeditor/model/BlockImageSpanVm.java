@@ -48,6 +48,11 @@ public class BlockImageSpanVm<T extends IBlockImageSpanObtainObject> {
      */
     private boolean isPhoto;
 
+    /**
+     * 是否来自草稿，（若来自草稿，则插入BlockImageSpan的时候，不在图片前面插入换行符'\n'）
+     */
+    private boolean isFromDraft;
+
     public BlockImageSpanVm(Context context, T spanObject) {
         this.width = (int) context.getResources().getDimension(R.dimen.rich_editor_image_width);
         this.maxHeight = (int) context.getResources().getDimension(R.dimen.rich_editor_image_max_height);
@@ -114,5 +119,13 @@ public class BlockImageSpanVm<T extends IBlockImageSpanObtainObject> {
 
     public void setPhoto(boolean isPhoto) {
         this.isPhoto = isPhoto;
+    }
+
+    public boolean isFromDraft() {
+        return isFromDraft;
+    }
+
+    public void setFromDraft(boolean isFromDraft) {
+        this.isFromDraft = isFromDraft;
     }
 }

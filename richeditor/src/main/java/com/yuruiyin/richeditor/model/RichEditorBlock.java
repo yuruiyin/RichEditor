@@ -1,9 +1,12 @@
 package com.yuruiyin.richeditor.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,8 +32,7 @@ public class RichEditorBlock {
     /**
      * 段落ImageSpan包含的实体
      */
-    private @Nullable
-    IBlockImageSpanObtainObject blockImageSpanObtainObject;
+    private @Nullable IBlockImageSpanObtainObject blockImageSpanObtainObject;
 
     /**
      * 行内样式列表（一个段落可能包含多个行内样式）

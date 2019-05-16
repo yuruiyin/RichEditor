@@ -14,6 +14,7 @@ import android.provider.MediaStore;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v7.content.res.AppCompatResources;
+import android.text.SpannableString;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -24,12 +25,14 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.hanks.lineheightedittext.LineHeightEditText;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.yuruiyin.richeditor.callback.OnImageClickListener;
 import com.yuruiyin.richeditor.config.AppConfig;
 import com.yuruiyin.richeditor.enumtype.FileTypeEnum;
 import com.yuruiyin.richeditor.enumtype.ImageTypeMarkEnum;
+import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
 import com.yuruiyin.richeditor.ext.LongClickableLinkMovementMethod;
 import com.yuruiyin.richeditor.model.BlockImageSpanVm;
 import com.yuruiyin.richeditor.model.RichEditorBlock;
@@ -177,6 +180,35 @@ public class RichEditText extends LineHeightEditText {
     }
 
     /**
+     * 清空编辑器的内容
+     */
+    public void clearContent() {
+        setText("");
+        requestFocus();
+        setSelection(0);
+    }
+
+    /**
+     * 插入整段文本(可能是普通文本、段落样式文本（标题或引用）)
+     * 使用场景：如恢复草稿
+     *
+     * @param richEditorBlock
+     */
+    public void insertBlockText(RichEditorBlock richEditorBlock) {
+        SpannableString spanStringContent = new SpannableString(richEditorBlock.getText() + "\n");
+        String blockType = richEditorBlock.getBlockType();
+        switch (blockType) {
+            case RichTypeEnum.BLOCK_NORMAL_TEXT:
+                mRichUtils.insertNormalTextBlock(spanStringContent, richEditorBlock.getInlineStyleEntityList());
+                break;
+            case RichTypeEnum.BLOCK_HEADLINE:
+            case RichTypeEnum.BLOCK_QUOTE:
+                mRichUtils.insertBlockSpanText(blockType, spanStringContent, richEditorBlock.getInlineStyleEntityList());
+                break;
+        }
+    }
+
+    /**
      * 控制视频、gif、长图标识的显示和隐藏
      *
      * @param imageItemView    包裹图标的外层View
@@ -238,14 +270,14 @@ public class RichEditText extends LineHeightEditText {
         int imageWidth = blockImageSpanVm.getWidth();
         int resImageWidth = imageWidth > editTextWidth ? editTextWidth : imageWidth;
         int imageMaxHeight = blockImageSpanVm.getMaxHeight() > internalImageMaxHeight
-            ? internalImageMaxHeight : blockImageSpanVm.getMaxHeight();
+                ? internalImageMaxHeight : blockImageSpanVm.getMaxHeight();
         int resImageHeight = (int) (originHeight * 1.0 / originWidth * resImageWidth);
         resImageHeight = resImageHeight > imageMaxHeight ? imageMaxHeight : resImageHeight;
         // 控制显示出来的图片的高度不会大于宽度的3倍
         double maxHeightWidthRadio = AppConfig.IMAGE_MAX_HEIGHT_WIDTH_RATIO;
         resImageHeight = resImageHeight > resImageWidth * maxHeightWidthRadio
-            ? (int) (resImageWidth * maxHeightWidthRadio)
-            : resImageHeight;
+                ? (int) (resImageWidth * maxHeightWidthRadio)
+                : resImageHeight;
 
         Activity activity = (Activity) mContext;
         View imageItemView = activity.getLayoutInflater().inflate(R.layout.rich_editor_image, null);
@@ -264,13 +296,13 @@ public class RichEditText extends LineHeightEditText {
         layoutParams.height = resImageHeight;
 
         ViewUtil.layoutView(
-            imageItemView,
-            resImageWidth + imageSpanPaddingRight,
-            resImageHeight + imageSpanPaddingTop + imageSpanPaddingBottom
+                imageItemView,
+                resImageWidth + imageSpanPaddingRight,
+                resImageHeight + imageSpanPaddingTop + imageSpanPaddingBottom
         );
 
         BlockImageSpan blockImageSpan = new BlockImageSpan(
-            mContext, ViewUtil.getBitmap(imageItemView), blockImageSpanVm
+                mContext, ViewUtil.getBitmap(imageItemView), blockImageSpanVm
         );
         mRichUtils.insertBlockImageSpan(blockImageSpan);
 
@@ -287,11 +319,11 @@ public class RichEditText extends LineHeightEditText {
 
         try {
             InputStream is = mContext.getContentResolver().openInputStream(
-                uri);
+                    uri);
             Bitmap bitmap = BitmapFactory.decodeStream(is);
             Drawable drawable = new BitmapDrawable(mContext.getResources(), bitmap);
             drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
-                drawable.getIntrinsicHeight());
+                    drawable.getIntrinsicHeight());
             is.close();
             insertBlockImage(drawable, blockImageSpanVm, onImageClickListener);
         } catch (Exception e) {
@@ -370,8 +402,8 @@ public class RichEditText extends LineHeightEditText {
     public void insertBlockImage(Bitmap bitmap, @NonNull BlockImageSpanVm blockImageSpanVm,
                                  OnImageClickListener onImageClickListener) {
         Drawable drawable = mContext != null
-            ? new BitmapDrawable(mContext.getResources(), bitmap)
-            : new BitmapDrawable(bitmap);
+                ? new BitmapDrawable(mContext.getResources(), bitmap)
+                : new BitmapDrawable(bitmap);
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
         drawable.setBounds(0, 0, width > 0 ? width : 0, height > 0 ? height : 0);
