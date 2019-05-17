@@ -239,15 +239,16 @@ public class RichUtils {
 
     List<RichEditorBlock> getContent() {
         List<RichEditorBlock> richEditorBlockList = new ArrayList<>();
-        //为了代码容易处理，如果文本末尾不是'\n'，则强制在末尾增加一个回车
         Editable editableTmp = mRichEditText.getEditableText();
         if (editableTmp.length() <= 0) {
             return richEditorBlockList;
         }
-        if (editableTmp.charAt(editableTmp.length() - 1) != '\n') {
-            insertStringIntoEditText("\n", editableTmp.length());
-        }
+
         String editTextContent = mRichEditText.getEditableText().toString();
+        //为了代码容易处理，如果文本末尾不是'\n'，则强制在末尾增加一个回车
+        if (editTextContent.charAt(editableTmp.length() - 1) != '\n') {
+            editTextContent += "\n";
+        }
         Editable editable = mRichEditText.getEditableText();
         int editTextLen = editTextContent.length();
 
