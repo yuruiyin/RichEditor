@@ -657,6 +657,9 @@ public class RichUtils {
     private int[] getCursorPosBlockBoundary() {
         int[] blockBoundaryArr = new int[2];
         int cursorPos = mRichEditText.getSelectionStart();
+        if (cursorPos == -1) {
+            cursorPos = 0;
+        }
         String content = mRichEditText.getEditableText().toString();
         int size = content.length();
         for (int i = cursorPos - 1; i >= 0; i--) {

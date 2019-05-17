@@ -273,7 +273,7 @@ public class RichEditText extends LineHeightEditText {
                 ? internalImageMaxHeight : blockImageSpanVm.getMaxHeight();
         int resImageHeight = (int) (originHeight * 1.0 / originWidth * resImageWidth);
         resImageHeight = resImageHeight > imageMaxHeight ? imageMaxHeight : resImageHeight;
-        // 控制显示出来的图片的高度不会大于宽度的3倍
+        // 控制显示出来的图片的高度不会大于宽度的2倍
         double maxHeightWidthRadio = AppConfig.IMAGE_MAX_HEIGHT_WIDTH_RATIO;
         resImageHeight = resImageHeight > resImageWidth * maxHeightWidthRadio
                 ? (int) (resImageWidth * maxHeightWidthRadio)

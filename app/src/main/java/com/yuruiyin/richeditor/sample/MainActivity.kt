@@ -398,6 +398,7 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         Log.d(TAG, "onStop")
+        handleSaveDraft()
     }
 
 }
