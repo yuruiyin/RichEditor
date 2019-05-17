@@ -31,7 +31,7 @@ allprojects {
 Step 2. Add the dependency in your app build.gradle:
 ```groovy
 dependencies {
-	implementation 'com.github.yuruiyin:RichEditor:0.0.2'
+	implementation 'com.github.yuruiyin:RichEditor:0.0.4'
 }
 ```
 
