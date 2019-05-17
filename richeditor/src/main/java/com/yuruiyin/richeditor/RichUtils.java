@@ -926,6 +926,10 @@ public class RichUtils {
     private void handleSelectionChanged(int cursorPos) {
         //如果光标定位到了imagespan的前面，则将光标移动到imageSpan的后面
         Editable editable = mRichEditText.getEditableText();
+        if (editable.length() <= 0 && cursorPos <= 0) {
+            mRichEditText.requestFocus();
+            mRichEditText.setSelection(0);
+        }
         ImageSpan[] imageSpans = editable.getSpans(cursorPos, cursorPos + 1, ImageSpan.class);
         if (imageSpans.length > 0) {
             //说明光标在ImageSpan的前面

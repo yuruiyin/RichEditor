@@ -160,11 +160,31 @@
             android:orientation="vertical"
             >
 
+            <EditText
+                android:id="@+id/etTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:paddingBottom="16dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="15dp"
+                android:background="#ffffff"
+                android:hint="标题（可选）"
+                android:inputType="textMultiLine"
+                android:maxLength="40"
+                android:maxLines="2"
+                android:textColor="#ff000000"
+                android:textColorHint="#ffdddddd"
+                android:textSize="19dp"
+                android:textStyle="bold"
+                />
+
             <com.yuruiyin.richeditor.RichEditText
                 android:id="@+id/richEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="5dp"
                 android:background="#ffffff"
                 android:gravity="top|left"
                 android:hint="请输入..."
