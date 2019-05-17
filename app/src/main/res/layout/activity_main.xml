@@ -205,6 +205,7 @@
                 app:editor_show_long_image_mark="true"
                 app:editor_show_video_mark="true"
                 app:editor_video_mark_resource_id="@mipmap/editor_video_mark_icon"
+                app:editor_headline_text_size="20dp"
                 />
 
             <TextView

@@ -81,6 +81,9 @@ public class RichEditText extends LineHeightEditText {
 
     private int screenWidth;
 
+    // 标题字体大小
+    private int gHeadlineTextSize;
+
     /**
      * EditText的宽度
      */
@@ -151,6 +154,9 @@ public class RichEditText extends LineHeightEditText {
 
             DisplayMetrics dm = context.getResources().getDisplayMetrics();
             gImageRadius = (int) ta.getDimension(R.styleable.RichEditText_editor_image_radius, 0);
+
+            float defHeadlineTextSize = context.getResources().getDimension( R.dimen.rich_editor_headline_text_size);
+            gHeadlineTextSize = (int) ta.getDimension(R.styleable.RichEditText_editor_headline_text_size, defHeadlineTextSize);
 
             ta.recycle();
         }
@@ -531,5 +537,13 @@ public class RichEditText extends LineHeightEditText {
 
     public void setIsShowLongImageMark(boolean isShowLongImageMark) {
         this.gIsShowLongImageMark = isShowLongImageMark;
+    }
+
+    public int getHeadlineTextSize() {
+        return gHeadlineTextSize;
+    }
+
+    public void setHeadlineTextSize(int headlineTextSize) {
+        this.gHeadlineTextSize = headlineTextSize;
     }
 }

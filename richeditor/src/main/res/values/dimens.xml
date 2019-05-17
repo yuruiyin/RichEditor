@@ -2,7 +2,7 @@
 <resources>
 
     <!-- 标题字体大小 -->
-    <dimen name="rich_editor_headline_text_size">20dp</dimen>
+    <dimen name="rich_editor_headline_text_size">18dp</dimen>
 
     <!-- 引用左侧竖线宽度 -->
     <dimen name="rich_editor_quote_stripe_width">7dp</dimen>

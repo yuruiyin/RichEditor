@@ -363,7 +363,7 @@ public class RichUtils {
 
     private IBlockSpan getBlockSpan(Class spanClazz) {
         if (HeadlineSpan.class == spanClazz) {
-            return new HeadlineSpan(mActivity);
+            return new HeadlineSpan(mActivity, mRichEditText.getHeadlineTextSize());
         } else if (CustomQuoteSpan.class == spanClazz) {
             return new CustomQuoteSpan(mActivity);
         }
@@ -747,7 +747,7 @@ public class RichUtils {
 
         switch (type) {
             case RichTypeEnum.BLOCK_HEADLINE:
-                return (int) (mActivity.getResources().getDimension(R.dimen.rich_editor_headline_text_size) * 1.25);
+                return (int) (mRichEditText.getHeadlineTextSize() * 1.25);
             case RichTypeEnum.BLOCK_QUOTE:
                 return (int) (mActivity.getResources().getDimension(R.dimen.rich_editor_quote_text_size) * 1.25);
         }

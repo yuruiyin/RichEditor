@@ -18,8 +18,8 @@ public class HeadlineSpan extends AbsoluteSizeSpan implements IBlockSpan {
 
     private String type;
 
-    public HeadlineSpan(Context context) {
-        super((int) context.getResources().getDimension(R.dimen.rich_editor_headline_text_size));
+    public HeadlineSpan(Context context, int textSize) {
+        super(textSize);
         type = RichTypeEnum.BLOCK_HEADLINE;
     }
 

@@ -12,6 +12,8 @@
         <attr name="editor_show_long_image_mark" format="boolean"/>
         <!-- 图片和视频圆角大小 -->
         <attr name="editor_image_radius" format="dimension"/>
+        <!-- 正文中标题字体大小 -->
+        <attr name="editor_headline_text_size" format="dimension"/>
     </declare-styleable>
 
 </resources>
