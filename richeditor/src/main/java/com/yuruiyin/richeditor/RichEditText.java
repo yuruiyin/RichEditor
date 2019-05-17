@@ -40,6 +40,7 @@ import com.yuruiyin.richeditor.model.StyleBtnVm;
 import com.yuruiyin.richeditor.span.BlockImageSpan;
 import com.yuruiyin.richeditor.utils.FileUtil;
 import com.yuruiyin.richeditor.utils.ViewUtil;
+import com.yuruiyin.richeditor.utils.WindowUtil;
 
 import java.io.File;
 import java.io.InputStream;
@@ -77,6 +78,8 @@ public class RichEditText extends LineHeightEditText {
 
     // 图片和视频封面的圆角大小
     private int gImageRadius;
+
+    private int screenWidth;
 
     /**
      * EditText的宽度
@@ -169,10 +172,17 @@ public class RichEditText extends LineHeightEditText {
         }
 
         mRichUtils = new RichUtils((Activity) context, this);
+
+        screenWidth = WindowUtil.getScreenSize(mContext)[0];
     }
 
     private int getWidthWithoutPadding() {
-        return getMeasuredWidth() - getPaddingLeft() - getPaddingRight() - IMAGE_SPAN_MINUS_VALUE;
+        int editTextMeasureWidth = getMeasuredWidth();
+        if (editTextMeasureWidth <= 0) {
+            // 可能是编辑器还不可见, 则直接
+            editTextMeasureWidth = screenWidth;
+        }
+        return editTextMeasureWidth - getPaddingLeft() - getPaddingRight() - IMAGE_SPAN_MINUS_VALUE;
     }
 
     public void initStyleButton(StyleBtnVm styleBtnVm) {
