@@ -200,7 +200,7 @@
                 android:textColorHint="#aaaaaa"
                 android:textCursorDrawable="@null"
                 android:textSize="16dp"
-                app:editor_image_radius="3dp"
+                app:editor_image_radius="5dp"
                 app:editor_show_gif_mark="true"
                 app:editor_show_long_image_mark="true"
                 app:editor_show_video_mark="true"
