@@ -334,7 +334,7 @@ public class RichUtils {
         }
     }
 
-    private void insertStringIntoEditText(CharSequence content, int pos) {
+    void insertStringIntoEditText(CharSequence content, int pos) {
         Editable editable = mRichEditText.getEditableText();//获得文本内容
         if (pos < 0 || pos >= editable.length()) {
             editable.append(content);

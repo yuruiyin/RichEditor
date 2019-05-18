@@ -38,6 +38,7 @@ import com.yuruiyin.richeditor.model.BlockImageSpanVm;
 import com.yuruiyin.richeditor.model.RichEditorBlock;
 import com.yuruiyin.richeditor.model.StyleBtnVm;
 import com.yuruiyin.richeditor.span.BlockImageSpan;
+import com.yuruiyin.richeditor.utils.ClipboardUtil;
 import com.yuruiyin.richeditor.utils.FileUtil;
 import com.yuruiyin.richeditor.utils.ViewUtil;
 import com.yuruiyin.richeditor.utils.WindowUtil;
@@ -473,22 +474,26 @@ public class RichEditText extends LineHeightEditText {
 
     @Override
     public boolean onTextContextMenuItem(int id) {
-        if (!(mContext instanceof IClipCallback)) {
-            return super.onTextContextMenuItem(id);
-        }
-
-        IClipCallback context = (IClipCallback) mContext;
-
         switch (id) {
             case android.R.id.cut:
-                context.onCut();
+                if (mContext instanceof IClipCallback) {
+                    ((IClipCallback) mContext).onCut();
+                }
                 break;
             case android.R.id.copy:
-                context.onCopy();
+                Log.d(TAG, "getSelectionStart: " + getSelectionStart() + ", getSelectionEnd: " + getSelectionEnd());
+                if (mContext instanceof IClipCallback) {
+                    ((IClipCallback) mContext).onCopy();
+                }
                 break;
             case android.R.id.paste:
-                context.onPaste();
-                //粘贴特殊处理
+                if (mContext instanceof IClipCallback) {
+                    ((IClipCallback) mContext).onPaste();
+                }
+
+                //粘贴特殊处理 获取剪贴板的内容，并转化为普通文本插入到EditText中
+                int cursorPos = getSelectionStart();
+                mRichUtils.insertStringIntoEditText(ClipboardUtil.getInstance(mContext).getClipboardText(), cursorPos);
                 return true;
             default:
                 break;
