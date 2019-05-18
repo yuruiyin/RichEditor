@@ -14,6 +14,7 @@ import android.provider.MediaStore;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v7.content.res.AppCompatResources;
+import android.text.Editable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -156,7 +157,7 @@ public class RichEditText extends LineHeightEditText {
             DisplayMetrics dm = context.getResources().getDisplayMetrics();
             gImageRadius = (int) ta.getDimension(R.styleable.RichEditText_editor_image_radius, 0);
 
-            float defHeadlineTextSize = context.getResources().getDimension( R.dimen.rich_editor_headline_text_size);
+            float defHeadlineTextSize = context.getResources().getDimension(R.dimen.rich_editor_headline_text_size);
             gHeadlineTextSize = (int) ta.getDimension(R.styleable.RichEditText_editor_headline_text_size, defHeadlineTextSize);
 
             ta.recycle();
@@ -268,7 +269,21 @@ public class RichEditText extends LineHeightEditText {
             tvGifOrLongImageMark.setVisibility(VISIBLE);
             tvGifOrLongImageMark.setText(ImageTypeMarkEnum.GIF);
         }
+    }
 
+    /**
+     * 在插入blockImage之前，先删除被光标选中的区域
+     */
+    private void removeSelectedContent() {
+        Editable editable = getEditableText();
+        int selectionStart = getSelectionStart();
+        int selectionEnd = getSelectionEnd();
+
+        if (selectionStart >= selectionEnd) {
+            return;
+        }
+
+        editable.delete(selectionStart, selectionEnd);
     }
 
     public void insertBlockImage(Drawable drawable, @NonNull BlockImageSpanVm blockImageSpanVm,
@@ -277,6 +292,8 @@ public class RichEditText extends LineHeightEditText {
             Log.e(TAG, "context is not activity context!");
             return;
         }
+
+        removeSelectedContent();
 
         int originWidth = drawable.getIntrinsicWidth();
         int originHeight = drawable.getIntrinsicHeight();
@@ -472,6 +489,18 @@ public class RichEditText extends LineHeightEditText {
         }
     }
 
+    /**
+     * 处理粘贴
+     */
+    private void handlePaste() {
+        int selectionStart = getSelectionStart();
+        int selectionEnd = getSelectionEnd();
+        Editable editable = getEditableText();
+        editable.delete(selectionStart, selectionEnd);
+        selectionStart = getSelectionStart();
+        mRichUtils.insertStringIntoEditText(ClipboardUtil.getInstance(mContext).getClipboardText(), selectionStart);
+    }
+
     @Override
     public boolean onTextContextMenuItem(int id) {
         switch (id) {
@@ -491,9 +520,7 @@ public class RichEditText extends LineHeightEditText {
                     ((IClipCallback) mContext).onPaste();
                 }
 
-                //粘贴特殊处理 获取剪贴板的内容，并转化为普通文本插入到EditText中
-                int cursorPos = getSelectionStart();
-                mRichUtils.insertStringIntoEditText(ClipboardUtil.getInstance(mContext).getClipboardText(), cursorPos);
+                handlePaste();
                 return true;
             default:
                 break;
