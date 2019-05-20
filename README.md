@@ -12,7 +12,7 @@
 - [x] 支持视频、gif和长图标记
 - [x] 支持图片圆角
 - [ ] 支持行内ImageSpan，如类似微博@xxx，#话题名#
-- [ ] undo redo
+- [x] undo redo
 - [ ] 支持清除样式
 - [ ] 编辑器内部复制粘贴ImageSpan（任意以ImageSpan方式插入的的类型，如图片、视频、自定义view等）
 
@@ -31,7 +31,7 @@ allprojects {
 Step 2. Add the dependency in your app build.gradle:
 ```groovy
 dependencies {
-	implementation 'com.github.yuruiyin:RichEditor:0.0.4'
+	implementation 'com.github.yuruiyin:RichEditor:0.1.0'
 }
 ```
 
