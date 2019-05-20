@@ -66,7 +66,11 @@ dependencies {
     <tr>
       <td align="center">editor_image_radius</td>
       <td align="center">图片和视频圆角大小</td>
-    </tr>       
+    </tr> 
+    <tr>
+      <td align="center">editor_headline_text_size</td>
+      <td align="center">标题字体大小</td>
+    </tr>        
   </tbody>
 </table>
 
