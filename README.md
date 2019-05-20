@@ -209,6 +209,13 @@ dependencies {
 ```
 说明：插入自定义布局最终也是通过bitmap以ImageSpan的形式插入到编辑器中的。
 
+#### 5）获取数据
+```kotlin
+    // 返回的编辑器实体是一个list，list中每个元素代表一个段落block，具体block参数可以参考RichEditorBlock, 
+    // 但是若需要保存草稿功能，则需要对该list进行转换成自己的实体，否则List<RichEditorBlock>序列化后反序列化会丢失数据,可以参考demo
+    val conntent: List<RichEditorBlock> = richEditText.content
+```
+
 ### 具体使用请参考[demo](https://github.com/yuruiyin/RichEditor/blob/master/app/src/main/java/com/yuruiyin/richeditor/sample/MainActivity.kt)
 
 ## 相关引用
