@@ -147,6 +147,22 @@
             android:textSize="15dp"
             />
 
+        <ImageView
+            android:id="@+id/ivUndo"
+            android:layout_width="@dimen/style_button_size"
+            android:layout_height="@dimen/style_button_size"
+            android:padding="7dp"
+            android:src="@mipmap/icon_undo"
+            />
+
+        <ImageView
+            android:id="@+id/ivRedo"
+            android:layout_width="@dimen/style_button_size"
+            android:layout_height="@dimen/style_button_size"
+            android:padding="7dp"
+            android:src="@mipmap/icon_redo"
+            />
+
     </com.google.android.flexbox.FlexboxLayout>
 
     <ScrollView
@@ -165,15 +181,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:paddingBottom="16dp"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:paddingTop="15dp"
                 android:background="#ffffff"
                 android:hint="标题（可选）"
                 android:inputType="textMultiLine"
                 android:maxLength="40"
                 android:maxLines="2"
+                android:paddingBottom="16dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="15dp"
                 android:textColor="#ff000000"
                 android:textColorHint="#ffdddddd"
                 android:textSize="19dp"
@@ -200,12 +216,12 @@
                 android:textColorHint="#aaaaaa"
                 android:textCursorDrawable="@null"
                 android:textSize="16dp"
+                app:editor_headline_text_size="20dp"
                 app:editor_image_radius="5dp"
                 app:editor_show_gif_mark="true"
                 app:editor_show_long_image_mark="true"
                 app:editor_show_video_mark="true"
                 app:editor_video_mark_resource_id="@mipmap/editor_video_mark_icon"
-                app:editor_headline_text_size="20dp"
                 />
 
             <TextView

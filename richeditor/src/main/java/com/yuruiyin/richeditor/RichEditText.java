@@ -43,6 +43,7 @@ import com.yuruiyin.richeditor.utils.ClipboardUtil;
 import com.yuruiyin.richeditor.utils.FileUtil;
 import com.yuruiyin.richeditor.utils.ViewUtil;
 import com.yuruiyin.richeditor.utils.WindowUtil;
+import ren.qinc.edit.PerformEdit;
 
 import java.io.File;
 import java.io.InputStream;
@@ -96,6 +97,8 @@ public class RichEditText extends LineHeightEditText {
     private Context mContext;
 
     private RichUtils mRichUtils;
+
+    private PerformEdit performEdit;
 
     public interface OnSelectionChangedListener {
         /**
@@ -182,12 +185,22 @@ public class RichEditText extends LineHeightEditText {
         mRichUtils = new RichUtils((Activity) context, this);
 
         screenWidth = WindowUtil.getScreenSize(mContext)[0];
+
+        performEdit = new PerformEdit(this);
+    }
+
+    public void undo() {
+        performEdit.undo();
+    }
+
+    public void redo() {
+        performEdit.redo();
     }
 
     private int getWidthWithoutPadding() {
         int editTextMeasureWidth = getMeasuredWidth();
         if (editTextMeasureWidth <= 0) {
-            // 可能是编辑器还不可见, 则直接
+            // 可能是编辑器还不可见, 则直接设置编辑器的宽度为屏幕的宽度
             editTextMeasureWidth = screenWidth;
         }
         return editTextMeasureWidth - getPaddingLeft() - getPaddingRight() - IMAGE_SPAN_MINUS_VALUE;

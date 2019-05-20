@@ -40,4 +40,6 @@ dependencies {
 
     // 圆角图片
     implementation 'com.makeramen:roundedimageview:2.3.0'
+
+    implementation 'ren.qinc.edit:lib:0.0.5'
 }

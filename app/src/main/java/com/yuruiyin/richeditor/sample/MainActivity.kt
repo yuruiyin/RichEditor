@@ -178,6 +178,10 @@ class MainActivity : AppCompatActivity() {
         ivAddGame.setOnClickListener {
             handleAddGame()
         }
+
+        ivUndo.setOnClickListener { richEditText.undo() }
+
+        ivRedo.setOnClickListener { richEditText.redo() }
     }
 
     private fun convertEditorContent(editorBlockList: List<RichEditorBlock>): List<DraftEditorBlock> {
