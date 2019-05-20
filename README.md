@@ -4,6 +4,9 @@
 ## 组件描述
 该组件是基于原生EditText+span的方式实现的，旨在提供一个功能齐全且使用方便的Android富文本编辑器。主要支持了加粗斜体等行内样式、标题引用等段内样式以及插入图片视频甚至自定义View等。
 
+## 功能演示
+![Demo](./image/demo.gif)
+
 ## 功能列表
 - [x] 支持加粗、斜体、删除线、下划线行内样式
 - [x] 支持插入标题、引用段内样式
@@ -115,14 +118,34 @@ dependencies {
 
 #### 3）插入图片或视频
 ```kotlin
-    // 添加图片
-    ivAddImage.setOnClickListener {
-        // 首先打开相册（若app中有自定义的相册，请更改如下代码）
+    /**
+     * 处理插入图片
+     */
+    private fun handleAddImage() {
         val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         startActivityForResult(intent, GET_PHOTO_REQUEST_CODE)
     }
 
-    // 选中相册图片回调
+    private fun doAddBlockImageSpan(
+            realImagePath: String, blockImageSpanObtainObject: IBlockImageSpanObtainObject, isFromDraft: Boolean = false
+    ) {
+//        val blockImageSpanVm = BlockImageSpanVm(this, imageVm) // 不指定宽高，使用组件默认宽高
+        val blockImageSpanVm =
+                BlockImageSpanVm(blockImageSpanObtainObject, imageWidth, imageMaxHeight) // 指定宽高
+        blockImageSpanVm.isFromDraft = isFromDraft
+        richEditText.insertBlockImage(realImagePath, blockImageSpanVm) { blockImageSpan ->
+            val spanObtainObject = blockImageSpan.blockImageSpanVm.spanObject
+            when (spanObtainObject) {
+                is ImageVm -> {
+                    Toast.makeText(this, "短按了图片-当前图片路径：${spanObtainObject.path}", Toast.LENGTH_SHORT).show()
+                }
+                is VideoVm -> {
+                    Toast.makeText(this, "短按了视频-当前视频路径：${spanObtainObject.path}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == GET_PHOTO_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
@@ -130,46 +153,64 @@ dependencies {
             val selectedImageUri = data.data ?: return
             val realImagePath = FileUtil.getFileRealPath(this, selectedImageUri) ?: return
             val fileType = FileUtil.getFileType(realImagePath) ?: return
-            var blockImageSpanVm = BlockImageSpanVm<IBlockImageSpanObtainObject>(this, null)
-
-            // 构造BlockImageSpan所需实体，主要包含要显示出来的图片宽高（也可使用组件默认的）、以及图片视频路径或自定义布局中的实体信息等。
             when (fileType) {
                 FileTypeEnum.STATIC_IMAGE, FileTypeEnum.GIF -> {
-                    // 图片（静态图或gif）
-                    val imageVm = ImageVm(realImagePath, "2") // 要保存的绑定到ImageSpan上的实体，未来取编辑器内容时会用到
-//                    blockImageSpanVm = BlockImageSpanVm(this, imageVm) // 不指定宽高，使用组件默认宽高
-                    blockImageSpanVm = BlockImageSpanVm(imageVm, imageWidth, imageMaxHeight) // 指定宽高
+                    val imageVm = ImageVm(realImagePath, "2")
+                    doAddBlockImageSpan(realImagePath, imageVm)
                 }
                 FileTypeEnum.VIDEO -> {
                     // 插入视频封面
                     val videoVm = VideoVm(realImagePath, "3")
-//                    blockImageSpanVm = BlockImageSpanVm(this, videoVm) // 不指定宽高，使用组件默认宽高
-                    blockImageSpanVm = BlockImageSpanVm(videoVm, imageWidth, imageMaxHeight) // 指定宽高
+                    doAddBlockImageSpan(realImagePath, videoVm)
                 }
             }
-
-            // 以uri的方式插入
-            richEditText.insertBlockImage(selectedImageUri, blockImageSpanVm) { blockImageSpan ->
-                val spanObtainObject = blockImageSpan.blockImageSpanVm.spanObject
-                when (spanObtainObject) {
-                    is ImageVm -> {
-                        Toast.makeText(this, "短按了图片-当前图片路径：${spanObtainObject.path}", Toast.LENGTH_SHORT).show()
-                    }
-                    is VideoVm -> {
-                        Toast.makeText(this, "短按了图片-当前图片路径：${spanObtainObject.path}", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-
-            // 以path的方式插入
-            richEditText.insertBlockImage(realImagePath, blockImageSpanVm) { blockImageSpan ->
-                // 同上
-            }
-
         }
-    }       
+    }
     
 ```
 
 #### 4) 插入自定义布局
-TODO
+```kotlin
+
+    /**
+     * 插入游戏
+     */
+    private fun handleAddGame() {
+        val gameVm = GameVm(1, "一起来捉妖")
+        doAddGame(gameVm)
+    }
+
+    private fun doAddGame(gameVm: GameVm, isFromDraft: Boolean = false) {
+        val gameItemView = layoutInflater.inflate(R.layout.editor_game_item, null)
+        val ivGameIcon = gameItemView.findViewById<ImageView>(R.id.ivGameIcon)
+        val tvGameName = gameItemView.findViewById<TextView>(R.id.tvGameName)
+        ivGameIcon.setImageResource(R.mipmap.icon_game_zhuoyao)
+        tvGameName.text = gameVm.name
+
+        ivGameIcon.layoutParams.width = gameIconSize
+        ivGameIcon.layoutParams.height = gameIconSize
+
+        val gameItemWidth = getEditTextWidthWithoutPadding()
+        ViewUtil.layoutView(gameItemView, gameItemWidth, gameItemHeight)
+
+        val blockImageSpanVm = BlockImageSpanVm(gameVm, gameItemWidth, imageMaxHeight)
+        blockImageSpanVm.isFromDraft = isFromDraft
+        richEditText.insertBlockImage(ViewUtil.getBitmap(gameItemView), blockImageSpanVm) { blockImageSpan ->
+            val retGameVm = blockImageSpan.blockImageSpanVm.spanObject as GameVm
+            // 点击游戏item
+            Toast.makeText(this, "短按了游戏：${retGameVm.name}", Toast.LENGTH_SHORT).show()
+        }
+    }    
+
+```
+说明：插入自定义布局最终也是通过bitmap以ImageSpan的形式插入到编辑器中的。
+
+### 具体使用请参考[demo](https://github.com/yuruiyin/RichEditor/blob/master/app/src/main/java/com/yuruiyin/richeditor/sample/MainActivity.kt)
+
+## 相关引用
+1) 设置EditText的光标高度: [LineHeightEditText](https://github.com/hanks-zyh/LineHeightEditText)
+2) 设置图片圆角: [RoundedImageView](https://github.com/vinc3m1/RoundedImageView)
+3) undo redo: [AndroidEdit](https://github.com/qinci/AndroidEdit)
+
+## 最后
+您的star是我把组件做到完美的动力~
