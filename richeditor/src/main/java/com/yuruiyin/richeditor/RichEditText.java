@@ -310,7 +310,7 @@ public class RichEditText extends LineHeightEditText {
 
         int originWidth = drawable.getIntrinsicWidth();
         int originHeight = drawable.getIntrinsicHeight();
-        blockImageSpanVm.setLong(originHeight > originWidth * 3);
+        blockImageSpanVm.setLong(originHeight > originWidth * AppConfig.IMAGE_MAX_HEIGHT_WIDTH_RATIO);
 
         // 这里减去一个值是为了防止部分手机（如华为Mate-10）ImageSpan右侧超出编辑区的时候，会导致ImageSpan被重复绘制的问题
         int editTextWidth = getWidthWithoutPadding();
