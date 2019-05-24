@@ -17,9 +17,10 @@
     <dimen name="rich_editor_quote_text_size">18dp</dimen>
 
     <!-- 发表长文编辑区中块级图片元素的padding -->
-    <dimen name="rich_editor_image_span_padding_top">15dp</dimen>
-    <dimen name="rich_editor_image_span_padding_bottom">15dp</dimen>
-    <dimen name="rich_editor_image_span_padding_right">2dp</dimen>
+    <dimen name="rich_editor_image_span_padding_top">10dp</dimen>
+    <dimen name="rich_editor_image_span_padding_bottom">10dp</dimen>
+    <dimen name="rich_editor_image_span_padding_right">1dp</dimen>
+    <dimen name="rich_editor_image_span_padding_left">1dp</dimen>
 
     <!-- 限制图片最大的高度，避免调用方传递超级大的高度而导致长图限制超级长的问题 -->
     <dimen name="rich_editor_image_width">120dp</dimen>

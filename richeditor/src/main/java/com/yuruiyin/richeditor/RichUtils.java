@@ -137,6 +137,19 @@ public class RichUtils {
     }
 
     /**
+     * 判断光标是否处于行首
+     */
+    private boolean isCursorInFirstIndexOfLine() {
+        int cursor = mRichEditText.getSelectionStart();
+        if (cursor < 0 || mRichEditText.length() <= 0) {
+            return true;
+        }
+
+        Editable editable = mRichEditText.getEditableText();
+        return cursor == 0 || editable.charAt(cursor - 1) == '\n';
+    }
+
+    /**
      * 在光标位置插入段落ImageSpan（如图片、视频封面、自定义view等）
      *
      * @param blockImageSpan 段落ImageSpan
@@ -147,7 +160,7 @@ public class RichUtils {
         }
 
         // 只有正常编辑器插入的ImageSpan才在前面都插入一空行，否则从草稿插入的不再另外加一空行
-        if (!blockImageSpan.getBlockImageSpanVm().isFromDraft()) {
+        if (!blockImageSpan.getBlockImageSpanVm().isFromDraft() && !isCursorInFirstIndexOfLine()) {
             insertStringIntoEditText("\n", mRichEditText.getSelectionStart());
         }
 
@@ -925,17 +938,10 @@ public class RichUtils {
      * @param cursorPos 当前光标位置
      */
     private void handleSelectionChanged(int cursorPos) {
-        //如果光标定位到了imagespan的前面，则将光标移动到imageSpan的后面
         Editable editable = mRichEditText.getEditableText();
         if (editable.length() <= 0 && cursorPos <= 0) {
             mRichEditText.requestFocus();
             mRichEditText.setSelection(0);
-        }
-        ImageSpan[] imageSpans = editable.getSpans(cursorPos, cursorPos + 1, ImageSpan.class);
-        if (imageSpans.length > 0) {
-            //说明光标在ImageSpan的前面
-            mRichEditText.setSelection(cursorPos + 1);
-            return;
         }
 
         // 先合并指定位置前后连续的行内样式
@@ -959,6 +965,7 @@ public class RichUtils {
      * 1、删除BlockImageSpan的时候，直接将光标定位到上一行末尾
      * 2、当光标处于BlockImageSpan下一行的第一个位置（不是EditText最后一个字符）上按删除按键时,
      * 不删除字符，而是将光标定位到上一行的末尾（即BlockImageSpan的末尾）
+     * 3、当光标处于BlockImageSpan的行首按删除按键时，如果上一行不是空行，则不删除字符，而是将光标移动到上一行的末尾
      */
     private boolean handleDeleteKey() {
         Editable editable = mRichEditText.getEditableText();
@@ -984,6 +991,14 @@ public class RichUtils {
         BlockImageSpan[] imageSpans1 = editable.getSpans(cursorPos - 2, cursorPos - 1, BlockImageSpan.class);
         String content = mRichEditText.getEditableText().toString();
         if (imageSpans1.length > 0 && cursorPos < content.length() && content.charAt(cursorPos) != '\n') {
+            mRichEditText.setSelection(cursorPos - 1);
+            return true;
+        }
+
+        // 当光标处于BlockImageSpan的行首按删除按键时，如果上一行不是空行，则不删除字符，而是将光标移动到上一行的末尾
+        BlockImageSpan[] imageSpans2 = editable.getSpans(cursorPos, cursorPos + 1, BlockImageSpan.class);
+        if (imageSpans2.length > 0 && cursorPos >= 2
+                && content.charAt(cursorPos - 1) == '\n' && content.charAt(cursorPos - 2) != '\n') {
             mRichEditText.setSelection(cursorPos - 1);
             return true;
         }

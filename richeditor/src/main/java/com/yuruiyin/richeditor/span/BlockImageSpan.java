@@ -23,6 +23,9 @@ import com.yuruiyin.richeditor.model.BlockImageSpanVm;
  */
 public class BlockImageSpan extends CenterImageSpan implements LongClickableSpan {
 
+    // 手指触摸到图片左侧之后，当成光标移动到左侧，不响应图片点击事件
+    private static final int TOUCH_OFFSET_X = 45;
+
     private float x;
     private float y;
 
@@ -80,7 +83,7 @@ public class BlockImageSpan extends CenterImageSpan implements LongClickableSpan
         Drawable drawable = getDrawable();
         if (drawable != null) {
             Rect rect = drawable.getBounds();
-            return touchX <= rect.right + x && touchX >= rect.left + x
+            return touchX <= rect.right + x && touchX >= rect.left + x + TOUCH_OFFSET_X
                     && touchY <= rect.bottom + y && touchY >= rect.top + y;
         }
         return false;

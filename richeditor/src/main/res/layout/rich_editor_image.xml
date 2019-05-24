@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     android:paddingBottom="@dimen/rich_editor_image_span_padding_bottom"
     android:paddingRight="@dimen/rich_editor_image_span_padding_right"
+    android:paddingLeft="@dimen/rich_editor_image_span_padding_left"
     android:paddingTop="@dimen/rich_editor_image_span_padding_top"
     >
 

@@ -22,7 +22,9 @@ public class RichTextWatcher implements TextWatcher {
     private int beforeEditContentLen = 0;
 
     // 需要插入回车符的位置，场景：在imageSpan后面输入文字时候需要换行
-    private int needInsertBreakLinePos = -1;
+    private int needInsertBreakLinePosAfterImage = -1;
+    // 是否需要在ImageSpan之前插入换行，场景：在imageSpan前面输入文字时候需要换行
+    private boolean isNeedInsertBreakLineBeforeImage;
 
     // 上次的输入框内容
     private String lastEditTextContent = "";
@@ -69,18 +71,25 @@ public class RichTextWatcher implements TextWatcher {
         beforeEditContentLen = s.length();
         Editable editable = mEditText.getText();
         int curPos = mEditText.getSelectionStart();
+
+        // 判断是否在图片后输入
         if (curPos == 0) {
-            needInsertBreakLinePos = -1;
-            return;
+            needInsertBreakLinePosAfterImage = -1;
+        } else {
+            // 判断是否在图片后面输入
+            BlockImageSpan[] blockImageSpansAfter = editable.getSpans(curPos - 1, curPos, BlockImageSpan.class);
+            if (blockImageSpansAfter.length > 0) {
+                //说明当前光标处于imageSpan的后面，如果在当前位置输入文字，需要另起一行
+                needInsertBreakLinePosAfterImage = curPos;
+            } else {
+                needInsertBreakLinePosAfterImage = -1;
+            }
         }
 
-        BlockImageSpan[] blockImageSpans = editable.getSpans(curPos - 1, curPos, BlockImageSpan.class);
-        if (blockImageSpans.length > 0) {
-            //说明当前光标处于imageSpan的后面，如果在当前位置输入文字，需要另起一行
-            needInsertBreakLinePos = curPos;
-        } else {
-            needInsertBreakLinePos = -1;
-        }
+        // 判断是否在图片前面输入
+        BlockImageSpan[] blockImageSpansBefore = editable.getSpans(curPos, curPos + 1, BlockImageSpan.class);
+        // 说明当前光标在ImageSpan的前面
+        isNeedInsertBreakLineBeforeImage = blockImageSpansBefore.length > 0;
     }
 
     @Override
@@ -101,10 +110,19 @@ public class RichTextWatcher implements TextWatcher {
 
         int cursorPos = mEditText.getSelectionStart();
         String editContent = s.toString();
-        if (needInsertBreakLinePos != -1 &&
+        if (needInsertBreakLinePosAfterImage != -1 &&
                 cursorPos > 0 && editContent.charAt(cursorPos - 1) != '\n') {
             //在imageSpan后面输入了文字（除了'\n'），则需要换行
-            s.insert(needInsertBreakLinePos, "\n");
+            s.insert(needInsertBreakLinePosAfterImage, "\n");
+        }
+
+        if (isNeedInsertBreakLineBeforeImage && cursorPos >= 0) {
+            // 在ImageSpan前输入回车, 则需要将光标移动到上一个行
+            // 在ImageSpan前输入文字（除了'\n'），则需要先换行，在将光标移动到上一行
+            if (editContent.charAt(cursorPos - 1) != '\n') {
+                s.insert(cursorPos, "\n");
+            }
+            mEditText.setSelection(cursorPos);
         }
 
         if (cursorPos > 0 && editContent.charAt(cursorPos - 1) == '\n' && !editContent.equals(lastEditTextContent)) {

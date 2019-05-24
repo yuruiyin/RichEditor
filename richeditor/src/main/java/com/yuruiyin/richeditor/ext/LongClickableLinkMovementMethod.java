@@ -32,10 +32,10 @@ public class LongClickableLinkMovementMethod extends LinkMovementMethod {
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mPressedSpan = getPressedSpan(textView, spannable, event);
-                if (mPressedSpan != null) {  //点击span区域
-                    Selection.setSelection(spannable, spannable.getSpanStart(mPressedSpan),
-                        spannable.getSpanEnd(mPressedSpan));
-                }
+//                if (mPressedSpan != null) {  //点击span区域
+//                    Selection.setSelection(spannable, spannable.getSpanStart(mPressedSpan),
+//                        spannable.getSpanEnd(mPressedSpan));
+//                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 BlockImageSpan touchedSpan = getPressedSpan(textView, spannable, event);
@@ -49,7 +49,7 @@ public class LongClickableLinkMovementMethod extends LinkMovementMethod {
                     if (MotionEvent.ACTION_UP == action) {
                         mPressedSpan.onClick(textView);
                     }
-                    super.onTouchEvent(textView, spannable, event);
+//                    super.onTouchEvent(textView, spannable, event);
                 }
                 mPressedSpan = null;
 //                safeRemoveSpan(spannable);

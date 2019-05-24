@@ -65,6 +65,7 @@ public class RichEditText extends LineHeightEditText {
 
     private int imageSpanPaddingTop;
     private int imageSpanPaddingBottom;
+    private int imageSpanPaddingLeft;
     private int imageSpanPaddingRight;
     // 内部限制的图片最大高度
     private int internalImageMaxHeight;
@@ -169,6 +170,7 @@ public class RichEditText extends LineHeightEditText {
         mContext = context;
         imageSpanPaddingTop = (int) mContext.getResources().getDimension(R.dimen.rich_editor_image_span_padding_top);
         imageSpanPaddingBottom = (int) mContext.getResources().getDimension(R.dimen.rich_editor_image_span_padding_bottom);
+        imageSpanPaddingLeft = (int) mContext.getResources().getDimension(R.dimen.rich_editor_image_span_padding_left);
         imageSpanPaddingRight = (int) mContext.getResources().getDimension(R.dimen.rich_editor_image_span_padding_right);
         internalImageMaxHeight = (int) mContext.getResources().getDimension(R.dimen.rich_editor_image_max_height);
 
@@ -344,7 +346,7 @@ public class RichEditText extends LineHeightEditText {
 
         ViewUtil.layoutView(
                 imageItemView,
-                resImageWidth + imageSpanPaddingRight,
+                resImageWidth + imageSpanPaddingLeft + imageSpanPaddingRight,
                 resImageHeight + imageSpanPaddingTop + imageSpanPaddingBottom
         );
 
