@@ -458,14 +458,6 @@ public class RichUtils {
     }
 
     /**
-     * 合并所有连续的inline span（由于有切割算法）
-     * 时机：需要上传富文本内容到服务端时
-     */
-    private void mergeAllContinuousInlineSpan() {
-        // TODO
-    }
-
-    /**
      * 获取合并后的span flag
      *
      * @param mergedLeftSpanFlag  被合并的左侧span flag
