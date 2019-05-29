@@ -39,10 +39,7 @@ import com.yuruiyin.richeditor.model.BlockImageSpanVm;
 import com.yuruiyin.richeditor.model.RichEditorBlock;
 import com.yuruiyin.richeditor.model.StyleBtnVm;
 import com.yuruiyin.richeditor.span.BlockImageSpan;
-import com.yuruiyin.richeditor.utils.ClipboardUtil;
-import com.yuruiyin.richeditor.utils.FileUtil;
-import com.yuruiyin.richeditor.utils.ViewUtil;
-import com.yuruiyin.richeditor.utils.WindowUtil;
+import com.yuruiyin.richeditor.utils.*;
 import ren.qinc.edit.PerformEdit;
 
 import java.io.File;
@@ -369,8 +366,16 @@ public class RichEditText extends LineHeightEditText {
         try {
             InputStream is = mContext.getContentResolver().openInputStream(
                     uri);
-            Bitmap bitmap = BitmapFactory.decodeStream(is);
-            Drawable drawable = new BitmapDrawable(mContext.getResources(), bitmap);
+            String filePath = FileUtil.getFileRealPath(mContext, uri);
+            Bitmap resBitmap;
+            int degree = BitmapUtil.readPictureDegree(filePath);
+            if (degree > 0) {
+                // 若图片角度大于0，则需要旋转角度
+                resBitmap = BitmapUtil.rotateBitmap(degree, filePath);
+            } else {
+                resBitmap = BitmapFactory.decodeStream(is);
+            }
+            Drawable drawable = new BitmapDrawable(mContext.getResources(), resBitmap);
             drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
                     drawable.getIntrinsicHeight());
             is.close();
