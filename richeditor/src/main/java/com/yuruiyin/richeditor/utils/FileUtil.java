@@ -11,6 +11,7 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 
+import android.webkit.MimeTypeMap;
 import com.yuruiyin.richeditor.enumtype.FileTypeEnum;
 
 import java.io.File;
@@ -31,19 +32,26 @@ public class FileUtil {
             return FileTypeEnum.STATIC_IMAGE;
         }
 
-        if (path.endsWith(".mp4") || path.endsWith(".avi")
-            || path.endsWith(".3gpp") || path.endsWith(".3gp") || path.startsWith(".mov")) {
-            return FileTypeEnum.VIDEO;
-        } else if (path.endsWith(".PNG") || path.endsWith(".png") || path.endsWith(".jpeg")
-            || path.endsWith(".jpg")
-            || path.endsWith(".webp") || path.endsWith(".WEBP") || path.endsWith(".JPEG")
-            || path.endsWith(".bmp")) {
+        String fileExtension = MimeTypeMap.getFileExtensionFromUrl(path);
+        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
+
+        if (TextUtils.isEmpty(mimeType)) {
             return FileTypeEnum.STATIC_IMAGE;
-        } else if (path.endsWith(".gif") || path.endsWith(".GIF")) {
+        }
+
+        if (mimeType.contains("video")) {
+            return FileTypeEnum.VIDEO;
+        }
+
+        if (mimeType.contains("gif")) {
             return FileTypeEnum.GIF;
-        } else if (path.endsWith(".mp3") || path.endsWith(".amr")
-            || path.endsWith(".aac") || path.endsWith(".war")
-            || path.endsWith(".flac") || path.endsWith(".lamr")) {
+        }
+
+        if (mimeType.contains("image")) {
+            return FileTypeEnum.STATIC_IMAGE;
+        }
+
+        if (mimeType.contains("audio")) {
             return FileTypeEnum.AUDIO;
         }
 
