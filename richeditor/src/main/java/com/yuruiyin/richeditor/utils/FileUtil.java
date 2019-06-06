@@ -10,7 +10,6 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
-
 import android.webkit.MimeTypeMap;
 import com.yuruiyin.richeditor.enumtype.FileTypeEnum;
 
@@ -27,12 +26,39 @@ public class FileUtil {
 
     private static final String TAG = "FileUtil";
 
+    private static String getFileExtensionFromUrl(String url) {
+        if (!TextUtils.isEmpty(url)) {
+            int fragment = url.lastIndexOf('#');
+            if (fragment > 0) {
+                url = url.substring(0, fragment);
+            }
+
+            int query = url.lastIndexOf('?');
+            if (query > 0) {
+                url = url.substring(0, query);
+            }
+
+            int filenamePos = url.lastIndexOf('/');
+            String filename =
+                    0 <= filenamePos ? url.substring(filenamePos + 1) : url;
+
+            if (!TextUtils.isEmpty(filename)) {
+                int dotPos = filename.lastIndexOf('.');
+                if (0 <= dotPos) {
+                    return filename.substring(dotPos + 1);
+                }
+            }
+        }
+
+        return "";
+    }
+
     public static String getFileType(String path) {
         if (TextUtils.isEmpty(path)) {
             return FileTypeEnum.STATIC_IMAGE;
         }
 
-        String fileExtension = MimeTypeMap.getFileExtensionFromUrl(path);
+        String fileExtension = getFileExtensionFromUrl(path);
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
 
         if (TextUtils.isEmpty(mimeType)) {
