@@ -16,7 +16,7 @@
         android:layout_height="200dp"
         android:scaleType="centerCrop"
         android:src="@drawable/bg_gif_mark"
-        app:riv_corner_radius="10dp"
+        app:riv_corner_radius="0dp"
         />
 
     <ImageView
