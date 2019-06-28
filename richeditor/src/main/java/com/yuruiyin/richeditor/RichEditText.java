@@ -329,10 +329,8 @@ public class RichEditText extends LineHeightEditText {
         View imageItemView = activity.getLayoutInflater().inflate(R.layout.rich_editor_image, null);
         RoundedImageView imageView = imageItemView.findViewById(R.id.image);
         imageView.setImageDrawable(drawable);
-        if (blockImageSpanVm.isPhoto() || blockImageSpanVm.isVideo()) {
-            // 相册图片或视频设置圆角
-            imageView.setCornerRadius(gImageRadius);
-        }
+        // 设置圆角
+        imageView.setCornerRadius(gImageRadius);
 
         // 控制视频、gif、长图标识的显示和隐藏
         setMarkIconVisibility(imageItemView, blockImageSpanVm);
