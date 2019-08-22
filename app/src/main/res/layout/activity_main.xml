@@ -57,6 +57,8 @@
             android:id="@+id/vgHeadline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
             >
 
             <ImageView
@@ -65,6 +67,15 @@
                 android:layout_height="@dimen/style_button_size"
                 android:padding="7dp"
                 android:src="@mipmap/icon_headline_normal"
+                />
+
+            <TextView
+                android:id="@+id/tvHeadline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="标题"
+                android:textSize="10dp"
+                android:textColor="@color/headline_normal_text_color"
                 />
 
         </LinearLayout>

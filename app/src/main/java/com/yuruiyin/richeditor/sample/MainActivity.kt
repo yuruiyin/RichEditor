@@ -3,6 +3,7 @@ package com.yuruiyin.richeditor.sample
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.util.Log
@@ -77,6 +78,99 @@ class MainActivity : AppCompatActivity() {
         registerEvents()
     }
 
+    /**
+     * 粗体
+     */
+    private fun initBold() {
+        val styleBtnVm = StyleBtnVm.Builder()
+                .setType(RichTypeEnum.BOLD)
+                .setIvIcon(ivBold)
+                .setIconNormalResId(R.mipmap.icon_bold_normal)
+                .setIconLightResId(R.mipmap.icon_bold_light)
+                .setClickedView(ivBold)
+                .build()
+
+        richEditText.initStyleButton(styleBtnVm)
+    }
+
+    /**
+     * 斜体
+     */
+    private fun initItalic() {
+        val styleBtnVm = StyleBtnVm.Builder()
+                .setType(RichTypeEnum.ITALIC)
+                .setIvIcon(ivItalic)
+                .setIconNormalResId(R.mipmap.icon_italic_normal)
+                .setIconLightResId(R.mipmap.icon_italic_light)
+                .setClickedView(ivItalic)
+                .build()
+
+        richEditText.initStyleButton(styleBtnVm)
+    }
+
+    /**
+     * 删除线
+     */
+    private fun initStrikeThrough() {
+        val styleBtnVm = StyleBtnVm.Builder()
+                .setType(RichTypeEnum.STRIKE_THROUGH)
+                .setIvIcon(ivStrikeThrough)
+                .setIconNormalResId(R.mipmap.icon_strikethrough_normal)
+                .setIconLightResId(R.mipmap.icon_strikethrough_light)
+                .setClickedView(ivStrikeThrough)
+                .build()
+
+        richEditText.initStyleButton(styleBtnVm)
+    }
+
+    /**
+     * 下划线
+     */
+    private fun initUnderline() {
+        val styleBtnVm = StyleBtnVm.Builder()
+                .setType(RichTypeEnum.UNDERLINE)
+                .setIvIcon(ivUnderline)
+                .setIconNormalResId(R.mipmap.icon_underline_normal)
+                .setIconLightResId(R.mipmap.icon_underline_light)
+                .setClickedView(ivUnderline)
+                .build()
+
+        richEditText.initStyleButton(styleBtnVm)
+    }
+
+    /**
+     * 标题
+     */
+    private fun initHeadline() {
+        val styleBtnVm = StyleBtnVm.Builder()
+                .setType(RichTypeEnum.BLOCK_HEADLINE)
+                .setIvIcon(ivHeadline)
+                .setIconNormalResId(R.mipmap.icon_headline_normal)
+                .setIconLightResId(R.mipmap.icon_headline_light)
+                .setClickedView(vgHeadline)
+                .setTvTitle(tvHeadline)
+                .setTitleNormalColor(ContextCompat.getColor(this@MainActivity, R.color.headline_normal_text_color))
+                .setTitleLightColor(ContextCompat.getColor(this@MainActivity, R.color.headline_light_text_color))
+                .build()
+
+        richEditText.initStyleButton(styleBtnVm)
+    }
+
+    /**
+     * 下划线
+     */
+    private fun initBlockQuote() {
+        val styleBtnVm = StyleBtnVm.Builder()
+                .setType(RichTypeEnum.BLOCK_QUOTE)
+                .setIvIcon(ivBlockquote)
+                .setIconNormalResId(R.mipmap.icon_blockquote_normal)
+                .setIconLightResId(R.mipmap.icon_blockquote_light)
+                .setClickedView(ivBlockquote)
+                .build()
+
+        richEditText.initStyleButton(styleBtnVm)
+    }
+
     private fun registerEvents() {
         // 生成json数据，显示到TextView上
         btnCreateJson.setOnClickListener {
@@ -104,71 +198,23 @@ class MainActivity : AppCompatActivity() {
             handleClearDraft()
         }
 
-        // 加粗
-        richEditText.initStyleButton(
-                StyleBtnVm(
-                        RichTypeEnum.BOLD,
-                        ivBold,
-                        R.mipmap.icon_bold_normal,
-                        R.mipmap.icon_bold_light,
-                        ivBold
-                )
-        )
+        // 粗体
+        initBold()
 
         // 斜体
-        richEditText.initStyleButton(
-                StyleBtnVm(
-                        RichTypeEnum.ITALIC,
-                        ivItalic,
-                        R.mipmap.icon_italic_normal,
-                        R.mipmap.icon_italic_light,
-                        ivItalic
-                )
-        )
+        initItalic()
 
         // 删除线
-        richEditText.initStyleButton(
-                StyleBtnVm(
-                        RichTypeEnum.STRIKE_THROUGH,
-                        ivStrikeThrough,
-                        R.mipmap.icon_strikethrough_normal,
-                        R.mipmap.icon_strikethrough_light,
-                        ivStrikeThrough
-                )
-        )
+        initStrikeThrough()
 
         // 下划线
-        richEditText.initStyleButton(
-                StyleBtnVm(
-                        RichTypeEnum.UNDERLINE,
-                        ivUnderline,
-                        R.mipmap.icon_underline_normal,
-                        R.mipmap.icon_underline_light,
-                        ivUnderline
-                )
-        )
+        initUnderline()
 
         // 标题
-        richEditText.initStyleButton(
-                StyleBtnVm(
-                        RichTypeEnum.BLOCK_HEADLINE,
-                        ivHeadline,
-                        R.mipmap.icon_headline_normal,
-                        R.mipmap.icon_headline_light,
-                        vgHeadline
-                )
-        )
+        initHeadline()
 
         // 引用
-        richEditText.initStyleButton(
-                StyleBtnVm(
-                        RichTypeEnum.BLOCK_QUOTE,
-                        ivBlockquote,
-                        R.mipmap.icon_blockquote_normal,
-                        R.mipmap.icon_blockquote_light,
-                        ivBlockquote
-                )
-        )
+        initBlockQuote()
 
         // 添加图片
         ivAddImage.setOnClickListener {
@@ -250,7 +296,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 // 以下就是用户自定义的blockType，可能是图片、视频、自定义类型等
                 BlockImageSpanType.IMAGE -> {
-                    val imageVm= it.image ?: return@forEach
+                    val imageVm = it.image ?: return@forEach
                     doAddBlockImageSpan(imageVm.path, imageVm, true)
                 }
                 BlockImageSpanType.VIDEO -> {
@@ -294,7 +340,7 @@ class MainActivity : AppCompatActivity() {
     private fun handleSaveDraft() {
         val richEditorBlockList = richEditText.content
         // 先将对象进行转换，让里头blockImageSpanObtainObject具体到各自类型的实体上（如ImageVm）
-        val draftEditorBlockList= convertEditorContent(richEditorBlockList)
+        val draftEditorBlockList = convertEditorContent(richEditorBlockList)
 
         val jsonContent = Gson().toJson(draftEditorBlockList)
         val sp = getSharedPreferences(SP_DRAFT_NAME, Context.MODE_PRIVATE)

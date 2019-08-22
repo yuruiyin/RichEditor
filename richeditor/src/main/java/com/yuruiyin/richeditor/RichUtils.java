@@ -1,6 +1,7 @@
 package com.yuruiyin.richeditor;
 
 import android.app.Activity;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.ParcelableSpan;
@@ -9,8 +10,10 @@ import android.text.Spanned;
 import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.ImageView;
 
+import android.widget.TextView;
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
 import com.yuruiyin.richeditor.model.IBlockImageSpanObtainObject;
 import com.yuruiyin.richeditor.model.IInlineImageSpanObtainObject;
@@ -82,7 +85,13 @@ public class RichUtils {
         String type = styleBtnVm.getType();
         styleBtnVm.setIsInlineType(isInlineType(type));
         mRichTypeToVmMap.put(type, styleBtnVm);
-        styleBtnVm.getClickedView().setOnClickListener(v -> {
+
+        View clickedView = styleBtnVm.getClickedView();
+        if (clickedView == null) {
+            clickedView = styleBtnVm.getIvIcon();
+        }
+
+        clickedView.setOnClickListener(v -> {
             if (mRichEditText.isFocused()) {
                 // 若未聚焦，则不响应点击事件
                 toggleStyle(type);
@@ -358,8 +367,26 @@ public class RichUtils {
         }
     }
 
-    private void changeStyleBtnImage(ImageView imageView, int resId) {
-        imageView.setImageResource(resId);
+    private void changeStyleBtnImage(StyleBtnVm styleBtnVm) {
+        ImageView ivIcon = styleBtnVm.getIvIcon();
+        if (ivIcon == null) {
+            return;
+        }
+
+        ivIcon.setImageResource(
+                styleBtnVm.isLight() ? styleBtnVm.getLightResId() : styleBtnVm.getNormalResId()
+        );
+    }
+
+    private void changeStyleBtnText(StyleBtnVm styleBtnVm) {
+        TextView tvTitle = styleBtnVm.getTvTitle();
+        if (tvTitle == null) {
+            return;
+        }
+
+        tvTitle.setTextColor(
+                styleBtnVm.isLight() ? styleBtnVm.getTitleLightColor() : styleBtnVm.getTitleNormalColor()
+        );
     }
 
     /**
@@ -625,8 +652,8 @@ public class RichUtils {
         }
 
         styleBtnVm.setLight(!styleBtnVm.isLight()); // 状态取反
-        changeStyleBtnImage(styleBtnVm.getIvButton(),
-                styleBtnVm.isLight() ? styleBtnVm.getLightResId() : styleBtnVm.getNormalResId());
+        changeStyleBtnImage(styleBtnVm);
+        changeStyleBtnText(styleBtnVm);
 
         if (!styleBtnVm.isInlineType()) {
             // 段落样式（标题、引用）
@@ -728,7 +755,8 @@ public class RichUtils {
         for (StyleBtnVm styleBtnVm : mRichTypeToVmMap.values()) {
             if (!styleBtnVm.isInlineType() && !styleBtnVm.getType().equals(curBlockType)) {
                 styleBtnVm.setLight(false);
-                changeStyleBtnImage(styleBtnVm.getIvButton(), styleBtnVm.getNormalResId());
+                changeStyleBtnImage(styleBtnVm);
+                changeStyleBtnText(styleBtnVm);
             }
         }
     }
@@ -853,7 +881,8 @@ public class RichUtils {
     private void clearStyleButtonsStatus() {
         for (StyleBtnVm styleBtnVm : mRichTypeToVmMap.values()) {
             styleBtnVm.setLight(false);
-            changeStyleBtnImage(styleBtnVm.getIvButton(), styleBtnVm.getNormalResId());
+            changeStyleBtnImage(styleBtnVm);
+            changeStyleBtnText(styleBtnVm);
         }
     }
 
@@ -878,7 +907,8 @@ public class RichUtils {
                     continue;
                 }
                 styleBtnVm.setLight(true);
-                changeStyleBtnImage(styleBtnVm.getIvButton(), styleBtnVm.getLightResId());
+                changeStyleBtnImage(styleBtnVm);
+                changeStyleBtnText(styleBtnVm);
             }
         }
     }

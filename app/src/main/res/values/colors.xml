@@ -5,4 +5,7 @@
     <color name="colorAccent">#D81B60</color>
 
     <color name="base_white">#ffffffff</color>
+
+    <color name="headline_normal_text_color">#ff1c1c1c</color>
+    <color name="headline_light_text_color">#ff0cc975</color>
 </resources>

@@ -1,8 +1,10 @@
 package com.yuruiyin.richeditor.model;
 
+import android.support.annotation.ColorInt;
 import android.view.View;
 import android.widget.ImageView;
 
+import android.widget.TextView;
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
 
 /**
@@ -25,53 +27,63 @@ public class StyleBtnVm {
     private boolean isInlineType;
 
     /**
-     * 按钮ImageView
-     */
-    private ImageView ivButton;
-
-    /**
      * 是否点亮
      */
     private boolean isLight;
 
     /**
+     * 按钮ImageView
+     */
+    private ImageView ivIcon;
+
+    /**
      * 正常的资源id
      */
-    private int normalResId;
+    private int iconNormalResId;
 
     /**
      * 点亮的资源id
      */
-    private int lightResId;
+    private int iconLightResId;
 
     /**
      * 被点击的view
      */
     private View clickedView;
 
-    public StyleBtnVm(@RichTypeEnum String type, ImageView ivButton, int normalResId, int lightResId, View clickedView) {
-        this.type = type;
-        this.ivButton = ivButton;
+    /**
+     * 标题文本（如粗体、斜体、标题等）
+     */
+    private TextView tvTitle;
+
+    /**
+     * 标题文本正常的颜色
+     */
+    private @ColorInt int titleNormalColor;
+
+    /**
+     * 标题文本点亮的颜色
+     */
+    private @ColorInt int titleLightColor;
+
+    public StyleBtnVm(Builder builder) {
+        this.type = builder.type;
+        this.ivIcon = builder.ivIcon;
         this.isLight = false;
-        this.normalResId = normalResId;
-        this.lightResId = lightResId;
-        this.clickedView = clickedView;
+        this.iconNormalResId = builder.iconNormalResId;
+        this.iconLightResId = builder.iconLightResId;
+        this.clickedView = builder.clickedView;
+        this.tvTitle = builder.tvTitle;
+        this.titleNormalColor = builder.titleNormalColor;
+        this.titleLightColor = builder.titleLightColor;
     }
 
     public String getType() {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public ImageView getIvButton() {
-        return ivButton;
-    }
-
-    public void setIvButton(ImageView ivButton) {
-        this.ivButton = ivButton;
+    public ImageView getIvIcon() {
+        return ivIcon;
     }
 
     public boolean isLight() {
@@ -83,19 +95,11 @@ public class StyleBtnVm {
     }
 
     public int getNormalResId() {
-        return normalResId;
-    }
-
-    public void setNormalResId(int normalResId) {
-        this.normalResId = normalResId;
+        return iconNormalResId;
     }
 
     public int getLightResId() {
-        return lightResId;
-    }
-
-    public void setLightResId(int lightResId) {
-        this.lightResId = lightResId;
+        return iconLightResId;
     }
 
     public boolean isInlineType() {
@@ -108,5 +112,103 @@ public class StyleBtnVm {
 
     public View getClickedView() {
         return clickedView;
+    }
+
+    public TextView getTvTitle() {
+        return tvTitle;
+    }
+
+    public int getTitleNormalColor() {
+        return titleNormalColor;
+    }
+
+    public int getTitleLightColor() {
+        return titleLightColor;
+    }
+
+    public static class Builder {
+        /**
+         * 具体类型（包含粗体、斜体、标题等）
+         */
+        private @RichTypeEnum String type;
+
+        /**
+         * 按钮ImageView
+         */
+        private ImageView ivIcon;
+
+        /**
+         * 正常的资源id
+         */
+        private int iconNormalResId;
+
+        /**
+         * 点亮的资源id
+         */
+        private int iconLightResId;
+
+        /**
+         * 被点击的view
+         */
+        private View clickedView;
+
+        /**
+         * 标题文本（如粗体、斜体、标题等）
+         */
+        private TextView tvTitle;
+
+        /**
+         * 标题文本正常的颜色
+         */
+        private @ColorInt int titleNormalColor;
+
+        /**
+         * 标题文本点亮的颜色
+         */
+        private @ColorInt int titleLightColor;
+
+        public Builder setType(@RichTypeEnum String type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder setIvIcon(ImageView ivIcon) {
+            this.ivIcon = ivIcon;
+            return this;
+        }
+
+        public Builder setIconNormalResId(int iconNormalResId) {
+            this.iconNormalResId = iconNormalResId;
+            return this;
+        }
+
+        public Builder setIconLightResId(int iconLightResId) {
+            this.iconLightResId = iconLightResId;
+            return this;
+        }
+
+        public Builder setTvTitle(TextView tvTitle) {
+            this.tvTitle = tvTitle;
+            return this;
+        }
+
+        public Builder setTitleNormalColor(@ColorInt int titleNormalColor) {
+            this.titleNormalColor = titleNormalColor;
+            return this;
+        }
+
+        public Builder setTitleLightColor(@ColorInt int titleLightColor) {
+            this.titleLightColor = titleLightColor;
+            return this;
+        }
+
+        public Builder setClickedView(View clickedView) {
+            this.clickedView = clickedView;
+            return this;
+        }
+
+        public StyleBtnVm build() {
+            return new StyleBtnVm(this);
+        }
     }
 }
