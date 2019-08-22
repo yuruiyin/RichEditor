@@ -110,7 +110,8 @@ class MainActivity : AppCompatActivity() {
                         RichTypeEnum.BOLD,
                         ivBold,
                         R.mipmap.icon_bold_normal,
-                        R.mipmap.icon_bold_light
+                        R.mipmap.icon_bold_light,
+                        ivBold
                 )
         )
 
@@ -120,7 +121,8 @@ class MainActivity : AppCompatActivity() {
                         RichTypeEnum.ITALIC,
                         ivItalic,
                         R.mipmap.icon_italic_normal,
-                        R.mipmap.icon_italic_light
+                        R.mipmap.icon_italic_light,
+                        ivItalic
                 )
         )
 
@@ -130,7 +132,8 @@ class MainActivity : AppCompatActivity() {
                         RichTypeEnum.STRIKE_THROUGH,
                         ivStrikeThrough,
                         R.mipmap.icon_strikethrough_normal,
-                        R.mipmap.icon_strikethrough_light
+                        R.mipmap.icon_strikethrough_light,
+                        ivStrikeThrough
                 )
         )
 
@@ -140,7 +143,8 @@ class MainActivity : AppCompatActivity() {
                         RichTypeEnum.UNDERLINE,
                         ivUnderline,
                         R.mipmap.icon_underline_normal,
-                        R.mipmap.icon_underline_light
+                        R.mipmap.icon_underline_light,
+                        ivUnderline
                 )
         )
 
@@ -150,7 +154,8 @@ class MainActivity : AppCompatActivity() {
                         RichTypeEnum.BLOCK_HEADLINE,
                         ivHeadline,
                         R.mipmap.icon_headline_normal,
-                        R.mipmap.icon_headline_light
+                        R.mipmap.icon_headline_light,
+                        vgHeadline
                 )
         )
 
@@ -160,7 +165,8 @@ class MainActivity : AppCompatActivity() {
                         RichTypeEnum.BLOCK_QUOTE,
                         ivBlockquote,
                         R.mipmap.icon_blockquote_normal,
-                        R.mipmap.icon_blockquote_light
+                        R.mipmap.icon_blockquote_light,
+                        ivBlockquote
                 )
         )
 

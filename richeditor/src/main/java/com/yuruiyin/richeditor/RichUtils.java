@@ -82,7 +82,7 @@ public class RichUtils {
         String type = styleBtnVm.getType();
         styleBtnVm.setIsInlineType(isInlineType(type));
         mRichTypeToVmMap.put(type, styleBtnVm);
-        styleBtnVm.getIvButton().setOnClickListener(v -> {
+        styleBtnVm.getClickedView().setOnClickListener(v -> {
             if (mRichEditText.isFocused()) {
                 // 若未聚焦，则不响应点击事件
                 toggleStyle(type);

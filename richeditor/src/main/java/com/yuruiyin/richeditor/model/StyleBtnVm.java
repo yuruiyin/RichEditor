@@ -1,5 +1,6 @@
 package com.yuruiyin.richeditor.model;
 
+import android.view.View;
 import android.widget.ImageView;
 
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
@@ -43,12 +44,18 @@ public class StyleBtnVm {
      */
     private int lightResId;
 
-    public StyleBtnVm(@RichTypeEnum String type, ImageView ivButton, int normalResId, int lightResId) {
+    /**
+     * 被点击的view
+     */
+    private View clickedView;
+
+    public StyleBtnVm(@RichTypeEnum String type, ImageView ivButton, int normalResId, int lightResId, View clickedView) {
         this.type = type;
         this.ivButton = ivButton;
         this.isLight = false;
         this.normalResId = normalResId;
         this.lightResId = lightResId;
+        this.clickedView = clickedView;
     }
 
     public String getType() {
@@ -97,5 +104,9 @@ public class StyleBtnVm {
 
     public void setIsInlineType(boolean isInlineType) {
         this.isInlineType = isInlineType;
+    }
+
+    public View getClickedView() {
+        return clickedView;
     }
 }
