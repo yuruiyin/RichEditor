@@ -22,9 +22,8 @@
     <dimen name="rich_editor_image_span_padding_right">1dp</dimen>
     <dimen name="rich_editor_image_span_padding_left">1dp</dimen>
 
-    <!-- 限制图片最大的高度，避免调用方传递超级大的高度而导致长图限制超级长的问题 -->
-    <dimen name="rich_editor_image_width">120dp</dimen>
-    <dimen name="rich_editor_image_max_height">640dp</dimen>
+    <!-- 默认图片宽度 -->
+    <dimen name="rich_editor_default_image_width">120dp</dimen>
 
     <!-- 图片类型（gif or长图）文字大小  -->
     <dimen name="rich_editor_image_type_text_size">10dp</dimen>

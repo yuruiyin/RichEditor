@@ -410,7 +410,7 @@ class MainActivity : AppCompatActivity() {
     ) {
 //        val blockImageSpanVm = BlockImageSpanVm(this, imageVm) // 不指定宽高，使用组件默认宽高
         val blockImageSpanVm =
-                BlockImageSpanVm(blockImageSpanObtainObject, imageWidth, imageMaxHeight) // 指定宽高
+                BlockImageSpanVm(blockImageSpanObtainObject, imageWidth) // 指定宽高
         blockImageSpanVm.isFromDraft = isFromDraft
         richEditText.insertBlockImage(realImagePath, blockImageSpanVm) { blockImageSpan ->
             val spanObtainObject = blockImageSpan.blockImageSpanVm.spanObject

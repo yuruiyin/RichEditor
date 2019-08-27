@@ -64,8 +64,6 @@ public class RichEditText extends LineHeightEditText {
     private int imageSpanPaddingBottom;
     private int imageSpanPaddingLeft;
     private int imageSpanPaddingRight;
-    // 内部限制的图片最大高度
-    private int internalImageMaxHeight;
 
     // 是否显示视频标识
     private boolean gIsShowVideoMark;
@@ -169,7 +167,6 @@ public class RichEditText extends LineHeightEditText {
         imageSpanPaddingBottom = (int) mContext.getResources().getDimension(R.dimen.rich_editor_image_span_padding_bottom);
         imageSpanPaddingLeft = (int) mContext.getResources().getDimension(R.dimen.rich_editor_image_span_padding_left);
         imageSpanPaddingRight = (int) mContext.getResources().getDimension(R.dimen.rich_editor_image_span_padding_right);
-        internalImageMaxHeight = (int) mContext.getResources().getDimension(R.dimen.rich_editor_image_max_height);
 
         mRichInputConnection = new RichInputConnectionWrapper(null, true);
         setMovementMethod(new LongClickableLinkMovementMethod());
@@ -315,11 +312,10 @@ public class RichEditText extends LineHeightEditText {
         int editTextWidth = getWidthWithoutPadding();
         int imageWidth = blockImageSpanVm.getWidth();
         int resImageWidth = imageWidth > editTextWidth ? editTextWidth : imageWidth;
-        int imageMaxHeight = blockImageSpanVm.getMaxHeight() > internalImageMaxHeight
-                ? internalImageMaxHeight : blockImageSpanVm.getMaxHeight();
+        int imageMaxHeight = blockImageSpanVm.getMaxHeight();
         int resImageHeight = (int) (originHeight * 1.0 / originWidth * resImageWidth);
         resImageHeight = resImageHeight > imageMaxHeight ? imageMaxHeight : resImageHeight;
-        // 控制显示出来的图片的高度不会大于宽度的2倍
+        // 控制显示出来的图片的高度不会大于宽度的3倍
         double maxHeightWidthRadio = AppConfig.IMAGE_MAX_HEIGHT_WIDTH_RATIO;
         resImageHeight = resImageHeight > resImageWidth * maxHeightWidthRadio
                 ? (int) (resImageWidth * maxHeightWidthRadio)
