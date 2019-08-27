@@ -310,9 +310,9 @@ public class RichEditText extends LineHeightEditText {
 
         // 这里减去一个值是为了防止部分手机（如华为Mate-10）ImageSpan右侧超出编辑区的时候，会导致ImageSpan被重复绘制的问题
         int editTextWidth = getWidthWithoutPadding();
-        int imageWidth = blockImageSpanVm.getWidth();
+        int imageWidth = blockImageSpanVm.getWidth() <= 0 ? originWidth : blockImageSpanVm.getWidth();
         int resImageWidth = imageWidth > editTextWidth ? editTextWidth : imageWidth;
-        int imageMaxHeight = blockImageSpanVm.getMaxHeight();
+        int imageMaxHeight = blockImageSpanVm.getMaxHeight() <= 0 ? originHeight : blockImageSpanVm.getMaxHeight();
         int resImageHeight = (int) (originHeight * 1.0 / originWidth * resImageWidth);
         resImageHeight = resImageHeight > imageMaxHeight ? imageMaxHeight : resImageHeight;
         // 控制显示出来的图片的高度不会大于宽度的3倍

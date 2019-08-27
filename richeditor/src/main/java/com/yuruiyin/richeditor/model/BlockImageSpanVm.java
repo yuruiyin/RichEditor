@@ -1,8 +1,5 @@
 package com.yuruiyin.richeditor.model;
 
-import android.content.Context;
-
-import com.yuruiyin.richeditor.R;
 import com.yuruiyin.richeditor.config.AppConfig;
 
 /**
@@ -54,12 +51,6 @@ public class BlockImageSpanVm<T extends IBlockImageSpanObtainObject> {
      */
     private boolean isFromDraft;
 
-    public BlockImageSpanVm(Context context, T spanObject) {
-        this.width = (int) context.getResources().getDimension(R.dimen.rich_editor_default_image_width);
-        this.maxHeight = (int) (this.width * AppConfig.IMAGE_MAX_HEIGHT_WIDTH_RATIO);
-        this.spanObject = spanObject;
-    }
-
     public BlockImageSpanVm(T spanObject, int width, int maxHeight) {
         this.width = width;
         this.maxHeight = maxHeight;
@@ -69,6 +60,12 @@ public class BlockImageSpanVm<T extends IBlockImageSpanObtainObject> {
     public BlockImageSpanVm(T spanObject, int width) {
         this.width = width;
         this.maxHeight = (int) (width * AppConfig.IMAGE_MAX_HEIGHT_WIDTH_RATIO);
+        this.spanObject = spanObject;
+    }
+
+    public BlockImageSpanVm(T spanObject) {
+        this.width = 0;
+        this.maxHeight = 0;
         this.spanObject = spanObject;
     }
 
