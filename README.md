@@ -229,6 +229,7 @@ dependencies {
     val conntent: List<RichEditorBlock> = richEditText.content
 ```
 
+
 ### 具体使用请参考[demo](https://github.com/yuruiyin/RichEditor/blob/master/app/src/main/java/com/yuruiyin/richeditor/sample/MainActivity.kt)
 
 ## 相关引用
