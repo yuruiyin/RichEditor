@@ -143,14 +143,14 @@ class MainActivity : AppCompatActivity() {
      */
     private fun initHeadline() {
         val styleBtnVm = StyleBtnVm.Builder()
-                .setType(RichTypeEnum.BLOCK_HEADLINE)
-                .setIvIcon(ivHeadline)
-                .setIconNormalResId(R.mipmap.icon_headline_normal)
-                .setIconLightResId(R.mipmap.icon_headline_light)
-                .setClickedView(vgHeadline)
-                .setTvTitle(tvHeadline)
-                .setTitleNormalColor(ContextCompat.getColor(this@MainActivity, R.color.headline_normal_text_color))
-                .setTitleLightColor(ContextCompat.getColor(this@MainActivity, R.color.headline_light_text_color))
+                .setType(RichTypeEnum.BLOCK_HEADLINE)  // 指定为段落标题类型
+                .setIvIcon(ivHeadline)       // 图标ImageView，用于修改高亮状态
+                .setIconNormalResId(R.mipmap.icon_headline_normal)  // 正常图标
+                .setIconLightResId(R.mipmap.icon_headline_light)    // 高亮图标
+                .setClickedView(vgHeadline)  // 指定被点击的view
+                .setTvTitle(tvHeadline)      // 按钮标题文字
+                .setTitleNormalColor(ContextCompat.getColor(this@MainActivity, R.color.headline_normal_text_color)) // 正常标题文字颜色
+                .setTitleLightColor(ContextCompat.getColor(this@MainActivity, R.color.headline_light_text_color))   // 高亮标题文字颜色
                 .build()
 
         richEditText.initStyleButton(styleBtnVm)

@@ -106,19 +106,33 @@ dependencies {
     />
 ```
 
-#### 2) 针对加粗、斜体、标题等需要修改图标样式的按钮（不包括插入图片按钮），如加粗，处理如下：
+#### 2) 针对加粗、斜体、标题等需要修改图标样式的按钮（不包括插入图片按钮），处理如下：
 ```kotlin
-    // 加粗
-    richEditText.initStyleButton(
-            StyleBtnVm(
-                    RichTypeEnum.BOLD,
-                    ivBold,
-                    R.mipmap.icon_bold_normal,
-                    R.mipmap.icon_bold_light
-            )
-    )
+    // 加粗, 仅包含图标（见demo）
+    val styleBtnVm = StyleBtnVm.Builder()
+            .setType(RichTypeEnum.BOLD)
+            .setIvIcon(ivBold)
+            .setIconNormalResId(R.mipmap.icon_bold_normal)
+            .setIconLightResId(R.mipmap.icon_bold_light)
+            .setClickedView(ivBold)
+            .build()
+
+    richEditText.initStyleButton(styleBtnVm)
+
+    // 标题，包含图标和文字（图标高亮的同时文字也要高亮）
+    val styleBtnVm = StyleBtnVm.Builder()
+            .setType(RichTypeEnum.BLOCK_HEADLINE)  // 指定为段落标题类型
+            .setIvIcon(ivHeadline)       // 图标ImageView，用于修改高亮状态
+            .setIconNormalResId(R.mipmap.icon_headline_normal)  // 正常图标资源id
+            .setIconLightResId(R.mipmap.icon_headline_light)    // 高亮图标资源id
+            .setClickedView(vgHeadline)  // 指定被点击的view
+            .setTvTitle(tvHeadline)      // 按钮标题文字
+            .setTitleNormalColor(ContextCompat.getColor(this@MainActivity, R.color.headline_normal_text_color)) // 正常标题文字颜色
+            .setTitleLightColor(ContextCompat.getColor(this@MainActivity, R.color.headline_light_text_color))   // 高亮标题文字颜色
+            .build()
+
+    richEditText.initStyleButton(styleBtnVm)
 ```
-说明：其中ivBold为加粗ImageView，由调用方在layout中定义；R.mipmap.icon_bold_normal和R.mipmap.icon_bold_light是加粗按钮正常状态和点亮状态图片的资源id。
 
 #### 3）插入图片或视频
 ```kotlin
