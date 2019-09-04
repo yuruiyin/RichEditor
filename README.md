@@ -226,7 +226,7 @@ dependencies {
 ```kotlin
     // 返回的编辑器实体是一个list，list中每个元素代表一个段落block，具体block参数可以参考RichEditorBlock, 
     // 但是若需要保存草稿功能，则需要对该list进行转换成自己的实体，否则List<RichEditorBlock>序列化后反序列化会丢失数据,可以参考demo
-    val conntent: List<RichEditorBlock> = richEditText.content
+    val content: List<RichEditorBlock> = richEditText.content
 ```
 
 
