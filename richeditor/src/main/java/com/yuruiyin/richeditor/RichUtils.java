@@ -1,8 +1,8 @@
 package com.yuruiyin.richeditor;
 
 import android.app.Activity;
-import android.support.annotation.ColorInt;
-import android.support.annotation.Nullable;
+import android.database.Observable;
+import androidx.annotation.Nullable;
 import android.text.Editable;
 import android.text.ParcelableSpan;
 import android.text.SpannableString;
@@ -12,14 +12,26 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
-
 import android.widget.TextView;
+
+import com.yuruiyin.richeditor.config.AppConfig;
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
 import com.yuruiyin.richeditor.model.IBlockImageSpanObtainObject;
 import com.yuruiyin.richeditor.model.IInlineImageSpanObtainObject;
 import com.yuruiyin.richeditor.model.RichEditorBlock;
 import com.yuruiyin.richeditor.model.StyleBtnVm;
-import com.yuruiyin.richeditor.span.*;
+import com.yuruiyin.richeditor.span.BlockImageSpan;
+import com.yuruiyin.richeditor.span.BoldStyleSpan;
+import com.yuruiyin.richeditor.span.CustomQuoteSpan;
+import com.yuruiyin.richeditor.span.CustomStrikeThroughSpan;
+import com.yuruiyin.richeditor.span.CustomUnderlineSpan;
+import com.yuruiyin.richeditor.span.HeadlineSpan;
+import com.yuruiyin.richeditor.span.IBlockSpan;
+import com.yuruiyin.richeditor.span.IInlineSpan;
+import com.yuruiyin.richeditor.span.InlineImageSpan;
+import com.yuruiyin.richeditor.span.ItalicStyleSpan;
+import com.yuruiyin.richeditor.undoredo.UndoRedoHelper;
+import com.yuruiyin.richeditor.utils.LogUtil;
 import com.yuruiyin.richeditor.utils.SoftKeyboardUtil;
 
 import java.util.ArrayList;
@@ -36,9 +48,10 @@ import java.util.Map;
  */
 public class RichUtils {
 
-    private static final String TAG = "RichUtils";
+    // 样式修改被观察者
+    private final ToggleStyleObservable toggleStyleObservable = new ToggleStyleObservable();
 
-    private static final String IMAGE_SPAN_PLACEHOLDER = "[image]";
+    private static final String TAG = "RichUtils";
 
     private RichEditText mRichEditText;
 
@@ -94,7 +107,7 @@ public class RichUtils {
         clickedView.setOnClickListener(v -> {
             if (mRichEditText.isFocused()) {
                 // 若未聚焦，则不响应点击事件
-                toggleStyle(type);
+                toggleStyleFromClickBtn(type);
             }
         });
     }
@@ -174,8 +187,8 @@ public class RichUtils {
         }
 
         //将bitmap插入到editText中
-        SpannableString imageSpannableString = new SpannableString(IMAGE_SPAN_PLACEHOLDER);
-        imageSpannableString.setSpan(blockImageSpan, 0, IMAGE_SPAN_PLACEHOLDER.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        SpannableString imageSpannableString = new SpannableString(AppConfig.IMAGE_SPAN_PLACEHOLDER);
+        imageSpannableString.setSpan(blockImageSpan, 0, AppConfig.IMAGE_SPAN_PLACEHOLDER.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         insertStringIntoEditText(imageSpannableString, mRichEditText.getSelectionStart());
 
         //在imageSpan后面都插入一空行
@@ -208,7 +221,7 @@ public class RichUtils {
      */
     private List<RichEditorBlock.InlineStyleEntity> getInlineStyleEntities(int blockStart, int blockEnd) {
         if (blockStart > blockEnd) {
-            Log.e(TAG, "the start-index is large than the end-index when get inlineStyle entities");
+            LogUtil.e(TAG, "the start-index is large than the end-index when get inlineStyle entities");
             return null;
         }
         List<RichEditorBlock.InlineStyleEntity> inlineStyleEntityList = new ArrayList<>();
@@ -432,10 +445,8 @@ public class RichUtils {
      *
      * @param spanClazz 执行行内样式class类型
      */
-    private void handleInlineStyleBoundary(Class spanClazz) {
+    private void handleInlineStyleBoundary(int start, int end, Class spanClazz) {
         Editable editable = mRichEditText.getEditableText();
-        int start = mRichEditText.getSelectionStart();
-        int end = mRichEditText.getSelectionEnd();
         IInlineSpan[] inlineSpans = (IInlineSpan[]) editable.getSpans(start, end, spanClazz);
 
         if (inlineSpans.length <= 0) {
@@ -633,10 +644,52 @@ public class RichUtils {
         return imageSpans.length <= 0;
     }
 
+    private void notifyUndoRedoStyleChanged(String type, int start, int end) {
+        UndoRedoHelper.Action action = new UndoRedoHelper.Action(start, end, type);
+        toggleStyleObservable.notifyChange(action);
+    }
+
+    public void registerToggleStyleObserver(UndoRedoHelper.ToggleStyleObserver observer) {
+        toggleStyleObservable.registerObserver(observer);
+    }
+
+    /**
+     * 放用户点击按钮（加粗、斜体、标题等）的时候
+     */
+    private void toggleStyleFromClickBtn(@RichTypeEnum String type) {
+        int start = mRichEditText.getSelectionStart();
+        int end = mRichEditText.getSelectionEnd();
+        toggleStyle(type, start, end, false);
+    }
+
+    public void toggleStyleFromUndoRedo(@RichTypeEnum String type, int start, int end) {
+        toggleStyle(type, start, end, true);
+    }
+
+    private void handleInlineStyle(int start, int end, Class spanClazz, StyleBtnVm styleBtnVm) {
+        Editable editable = mRichEditText.getEditableText();
+
+        IInlineSpan[] inlineSpans = (IInlineSpan[]) editable.getSpans(start, end, spanClazz);
+
+        // 先将两端的span进行切割
+        handleInlineStyleBoundary(start, end, spanClazz);
+
+        // 可能存在多个分段的span，需要先都移除
+        for (IInlineSpan span : inlineSpans) {
+            editable.removeSpan(span);
+        }
+
+        if (styleBtnVm.isLight()) {
+            int flags = start == end ? Spanned.SPAN_INCLUSIVE_INCLUSIVE : Spanned.SPAN_EXCLUSIVE_INCLUSIVE;
+            editable.setSpan(getInlineStyleSpan(spanClazz), start, end, flags);
+            mergeContinuousInlineSpan(start, end, spanClazz);
+        }
+    }
+
     /**
      * 处理样式修改
      */
-    private void toggleStyle(@RichTypeEnum String type) {
+    private void toggleStyle(@RichTypeEnum String type, int start, int end, boolean isFromUndoRedo) {
         if (!isTextBlock()) {
             return;
         }
@@ -658,27 +711,13 @@ public class RichUtils {
         if (!styleBtnVm.isInlineType()) {
             // 段落样式（标题、引用）
             handleBlockType(styleBtnVm);
-            return;
+        } else {
+            // 行内样式
+            handleInlineStyle(start, end, spanClazz, styleBtnVm);
         }
 
-        Editable editable = mRichEditText.getEditableText();
-        int start = mRichEditText.getSelectionStart();
-        int end = mRichEditText.getSelectionEnd();
-
-        IInlineSpan[] inlineSpans = (IInlineSpan[]) editable.getSpans(start, end, spanClazz);
-
-        // 先将两端的span进行切割
-        handleInlineStyleBoundary(spanClazz);
-
-        // 可能存在多个分段的span，需要先都移除
-        for (IInlineSpan span : inlineSpans) {
-            editable.removeSpan(span);
-        }
-
-        if (styleBtnVm.isLight()) {
-            int flags = start == end ? Spanned.SPAN_INCLUSIVE_INCLUSIVE : Spanned.SPAN_EXCLUSIVE_INCLUSIVE;
-            editable.setSpan(getInlineStyleSpan(spanClazz), start, end, flags);
-            mergeContinuousInlineSpan(start, end, spanClazz);
+        if (!isFromUndoRedo) {
+            notifyUndoRedoStyleChanged(type, start, end);
         }
     }
 
@@ -1106,10 +1145,11 @@ public class RichUtils {
                 String leftSpanContent = editable.toString().substring(start, cursorPos - 1);
                 String rightSpanContent = editable.toString().substring(cursorPos, end);
                 int leftSpanEnd = cursorPos - 1;
-                if (leftSpanContent.contains(IMAGE_SPAN_PLACEHOLDER)) {
+                if (leftSpanContent.contains(AppConfig.IMAGE_SPAN_PLACEHOLDER)) {
                     // 在图片后面blockSpan前面插入了回车符
-                    leftSpanContent = leftSpanContent.substring(0, leftSpanContent.length() - IMAGE_SPAN_PLACEHOLDER.length());
-                    leftSpanEnd -= IMAGE_SPAN_PLACEHOLDER.length();
+                    leftSpanContent = leftSpanContent.substring(0,
+                            leftSpanContent.length() - AppConfig.IMAGE_SPAN_PLACEHOLDER.length());
+                    leftSpanEnd -= AppConfig.IMAGE_SPAN_PLACEHOLDER.length();
                 }
                 if (!leftSpanContent.isEmpty()) {
                     IBlockSpan newLeftSpan = getBlockSpan(spanClazz);
@@ -1119,6 +1159,14 @@ public class RichUtils {
                     IBlockSpan newRightSpan = getBlockSpan(spanClazz);
                     editable.setSpan(newRightSpan, cursorPos, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
                 }
+            }
+        }
+    }
+
+    public class ToggleStyleObservable extends Observable<UndoRedoHelper.ToggleStyleObserver> {
+        void notifyChange(UndoRedoHelper.Action action) {
+            for (UndoRedoHelper.ToggleStyleObserver observer : mObservers) {
+                observer.onChange(action);
             }
         }
     }

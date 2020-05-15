@@ -14,4 +14,6 @@ public interface AppConfig {
      */
     double IMAGE_MAX_HEIGHT_WIDTH_RATIO = 3.0;
 
+    String IMAGE_SPAN_PLACEHOLDER = "[image]";
+
 }

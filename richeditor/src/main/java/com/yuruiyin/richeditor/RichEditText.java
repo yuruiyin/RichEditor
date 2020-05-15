@@ -4,28 +4,27 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
-import android.support.v7.content.res.AppCompatResources;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 
 import com.hanks.lineheightedittext.LineHeightEditText;
 import com.makeramen.roundedimageview.RoundedImageView;
@@ -39,11 +38,15 @@ import com.yuruiyin.richeditor.model.BlockImageSpanVm;
 import com.yuruiyin.richeditor.model.RichEditorBlock;
 import com.yuruiyin.richeditor.model.StyleBtnVm;
 import com.yuruiyin.richeditor.span.BlockImageSpan;
-import com.yuruiyin.richeditor.utils.*;
-import ren.qinc.edit.PerformEdit;
+import com.yuruiyin.richeditor.undoredo.UndoRedoHelper;
+import com.yuruiyin.richeditor.utils.BitmapUtil;
+import com.yuruiyin.richeditor.utils.ClipboardUtil;
+import com.yuruiyin.richeditor.utils.FileUtil;
+import com.yuruiyin.richeditor.utils.LogUtil;
+import com.yuruiyin.richeditor.utils.ViewUtil;
+import com.yuruiyin.richeditor.utils.WindowUtil;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -90,11 +93,11 @@ public class RichEditText extends LineHeightEditText {
 
     private RichInputConnectionWrapper mRichInputConnection;
 
-    private Context mContext;
+    private Activity mActivity;
 
     private RichUtils mRichUtils;
 
-    private PerformEdit performEdit;
+    private UndoRedoHelper undoRedoHelper;
 
     public interface OnSelectionChangedListener {
         /**
@@ -162,35 +165,37 @@ public class RichEditText extends LineHeightEditText {
             ta.recycle();
         }
 
-        mContext = context;
-        imageSpanPaddingTop = (int) mContext.getResources().getDimension(R.dimen.rich_editor_image_span_padding_top);
-        imageSpanPaddingBottom = (int) mContext.getResources().getDimension(R.dimen.rich_editor_image_span_padding_bottom);
-        imageSpanPaddingLeft = (int) mContext.getResources().getDimension(R.dimen.rich_editor_image_span_padding_left);
-        imageSpanPaddingRight = (int) mContext.getResources().getDimension(R.dimen.rich_editor_image_span_padding_right);
+        mActivity = (Activity) context;
+        if (mActivity == null) {
+            LogUtil.e(TAG, "activity is null");
+            return;
+        }
+
+        imageSpanPaddingTop = (int) mActivity.getResources().getDimension(R.dimen.rich_editor_image_span_padding_top);
+        imageSpanPaddingBottom = (int) mActivity.getResources().getDimension(R.dimen.rich_editor_image_span_padding_bottom);
+        imageSpanPaddingLeft = (int) mActivity.getResources().getDimension(R.dimen.rich_editor_image_span_padding_left);
+        imageSpanPaddingRight = (int) mActivity.getResources().getDimension(R.dimen.rich_editor_image_span_padding_right);
 
         mRichInputConnection = new RichInputConnectionWrapper(null, true);
         setMovementMethod(new LongClickableLinkMovementMethod());
         requestFocus();
         setSelection(0);
 
-        if (!(mContext instanceof Activity)) {
-            Log.e(TAG, "context is not activity context!");
-            return;
-        }
+        mRichUtils = new RichUtils(mActivity, this);
 
-        mRichUtils = new RichUtils((Activity) context, this);
-
-        screenWidth = WindowUtil.getScreenSize(mContext)[0];
-
-        performEdit = new PerformEdit(this);
+        screenWidth = WindowUtil.getScreenSize(mActivity)[0];
     }
 
     public void undo() {
-        performEdit.undo();
+        if (undoRedoHelper != null) {
+            undoRedoHelper.undo();
+        }
     }
 
     public void redo() {
-        performEdit.redo();
+        if (undoRedoHelper != null) {
+            undoRedoHelper.redo();
+        }
     }
 
     private int getWidthWithoutPadding() {
@@ -252,7 +257,7 @@ public class RichEditText extends LineHeightEditText {
         // 处理视频
         if (blockImageSpanVm.isVideo() && gIsShowVideoMark && gVideoMarkResourceId != 0) {
             // 视频封面，显示视频标识
-            Drawable videoIconDrawable = AppCompatResources.getDrawable(mContext, gVideoMarkResourceId);
+            Drawable videoIconDrawable = AppCompatResources.getDrawable(mActivity, gVideoMarkResourceId);
             if (videoIconDrawable != null) {
                 ivVideoIcon.setVisibility(VISIBLE);
                 ivVideoIcon.setImageDrawable(videoIconDrawable);
@@ -297,11 +302,6 @@ public class RichEditText extends LineHeightEditText {
 
     public void insertBlockImage(Drawable drawable, @NonNull BlockImageSpanVm blockImageSpanVm,
                                  OnImageClickListener onImageClickListener) {
-        if (!(mContext instanceof Activity)) {
-            Log.e(TAG, "context is not activity context!");
-            return;
-        }
-
         removeSelectedContent();
 
         int originWidth = drawable.getIntrinsicWidth();
@@ -311,18 +311,17 @@ public class RichEditText extends LineHeightEditText {
         // 这里减去一个值是为了防止部分手机（如华为Mate-10）ImageSpan右侧超出编辑区的时候，会导致ImageSpan被重复绘制的问题
         int editTextWidth = getWidthWithoutPadding();
         int imageWidth = blockImageSpanVm.getWidth() <= 0 ? originWidth : blockImageSpanVm.getWidth();
-        int resImageWidth = imageWidth > editTextWidth ? editTextWidth : imageWidth;
+        int resImageWidth = Math.min(imageWidth, editTextWidth);
         int imageMaxHeight = blockImageSpanVm.getMaxHeight() <= 0 ? originHeight : blockImageSpanVm.getMaxHeight();
         int resImageHeight = (int) (originHeight * 1.0 / originWidth * resImageWidth);
-        resImageHeight = resImageHeight > imageMaxHeight ? imageMaxHeight : resImageHeight;
+        resImageHeight = Math.min(resImageHeight, imageMaxHeight);
         // 控制显示出来的图片的高度不会大于宽度的3倍
         double maxHeightWidthRadio = AppConfig.IMAGE_MAX_HEIGHT_WIDTH_RATIO;
         resImageHeight = resImageHeight > resImageWidth * maxHeightWidthRadio
                 ? (int) (resImageWidth * maxHeightWidthRadio)
                 : resImageHeight;
 
-        Activity activity = (Activity) mContext;
-        View imageItemView = activity.getLayoutInflater().inflate(R.layout.rich_editor_image, null);
+        View imageItemView = mActivity.getLayoutInflater().inflate(R.layout.rich_editor_image, null);
         RoundedImageView imageView = imageItemView.findViewById(R.id.image);
         imageView.setImageDrawable(drawable);
         // 设置圆角
@@ -342,41 +341,12 @@ public class RichEditText extends LineHeightEditText {
         );
 
         BlockImageSpan blockImageSpan = new BlockImageSpan(
-                mContext, ViewUtil.getBitmap(imageItemView), blockImageSpanVm
+                mActivity, BitmapUtil.getBitmap(imageItemView), blockImageSpanVm
         );
         mRichUtils.insertBlockImageSpan(blockImageSpan);
 
         // 设置图片点击监听器
         blockImageSpan.setOnClickListener(onImageClickListener);
-    }
-
-    private void insertBlockImageInternal(Uri uri, @NonNull BlockImageSpanVm blockImageSpanVm,
-                                          OnImageClickListener onImageClickListener) {
-        if (uri == null) {
-            Log.e(TAG, "uri is null");
-            return;
-        }
-
-        try {
-            InputStream is = mContext.getContentResolver().openInputStream(
-                    uri);
-            String filePath = FileUtil.getFileRealPath(mContext, uri);
-            Bitmap resBitmap;
-            int degree = BitmapUtil.readPictureDegree(filePath);
-            if (degree > 0) {
-                // 若图片角度大于0，则需要旋转角度
-                resBitmap = BitmapUtil.rotateBitmap(degree, filePath);
-            } else {
-                resBitmap = BitmapFactory.decodeStream(is);
-            }
-            Drawable drawable = new BitmapDrawable(mContext.getResources(), resBitmap);
-            drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
-                    drawable.getIntrinsicHeight());
-            is.close();
-            insertBlockImage(drawable, blockImageSpanVm, onImageClickListener);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to loaded content " + uri, e);
-        }
     }
 
     /**
@@ -389,11 +359,11 @@ public class RichEditText extends LineHeightEditText {
     public void insertBlockImage(Uri uri, @NonNull BlockImageSpanVm blockImageSpanVm,
                                  OnImageClickListener onImageClickListener) {
         if (uri == null) {
-            Log.e(TAG, "uri is null");
+            LogUtil.e(TAG, "uri is null");
             return;
         }
 
-        insertBlockImage(FileUtil.getFileRealPath(mContext, uri), blockImageSpanVm, onImageClickListener);
+        insertBlockImage(FileUtil.getFileRealPath(mActivity, uri), blockImageSpanVm, onImageClickListener);
     }
 
     /**
@@ -406,55 +376,74 @@ public class RichEditText extends LineHeightEditText {
     public void insertBlockImage(String filePath, @NonNull BlockImageSpanVm blockImageSpanVm,
                                  OnImageClickListener onImageClickListener) {
         if (TextUtils.isEmpty(filePath)) {
-            Log.e(TAG, "file path is empty");
+            LogUtil.e(TAG, "file path is empty");
             return;
         }
 
-        String fileType = FileUtil.getFileType(filePath);
-        switch (fileType) {
-            case FileTypeEnum.VIDEO:
-                Bitmap coverBitmap = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Video.Thumbnails.MINI_KIND);
-                blockImageSpanVm.setVideo(true);
-                blockImageSpanVm.setGif(false);
-                insertBlockImage(coverBitmap, blockImageSpanVm, onImageClickListener);
-                break;
-            case FileTypeEnum.STATIC_IMAGE:
-            case FileTypeEnum.GIF:
-                File file = new File(filePath);
-                blockImageSpanVm.setVideo(false);
-                if (FileTypeEnum.GIF.equals(fileType)) {
-                    blockImageSpanVm.setGif(true);
-                } else {
+        try {
+            File imageFile = new File(filePath);
+            if (!imageFile.exists()) {
+                LogUtil.e(TAG, "image file does not exist");
+                return;
+            }
+
+            String fileType = FileUtil.getFileType(filePath);
+            switch (fileType) {
+                case FileTypeEnum.VIDEO:
+                    Bitmap coverBitmap = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Video.Thumbnails.MINI_KIND);
+                    blockImageSpanVm.setVideo(true);
                     blockImageSpanVm.setGif(false);
-                }
-                // 通过uri或path调用的可以断定为相册图片或视频，有添加圆角的需求
-                blockImageSpanVm.setPhoto(true);
-                insertBlockImageInternal(Uri.fromFile(file), blockImageSpanVm, onImageClickListener);
-                break;
-            default:
-                Log.e(TAG, "file type is illegal");
-                break;
+                    insertBlockImage(coverBitmap, blockImageSpanVm, onImageClickListener);
+                    break;
+                case FileTypeEnum.STATIC_IMAGE:
+                case FileTypeEnum.GIF:
+                    blockImageSpanVm.setVideo(false);
+                    if (FileTypeEnum.GIF.equals(fileType)) {
+                        blockImageSpanVm.setGif(true);
+                    } else {
+                        blockImageSpanVm.setGif(false);
+                    }
+                    // 通过uri或path调用的可以断定为相册图片或视频，有添加圆角的需求
+                    blockImageSpanVm.setPhoto(true);
+
+                    int vmExpectWidth = blockImageSpanVm.getWidth();
+                    int expectWidth = vmExpectWidth <= 0 ? gRichEditTextWidthWithoutPadding : vmExpectWidth;
+                    Bitmap resBitmap = BitmapUtil.decodeSampledBitmapFromFilePath(filePath, expectWidth);
+                    resBitmap = BitmapUtil.rotateBitmap(filePath, resBitmap);
+
+                    Drawable drawable = new BitmapDrawable(mActivity.getResources(), resBitmap);
+                    drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
+                            drawable.getIntrinsicHeight());
+                    insertBlockImage(drawable, blockImageSpanVm, onImageClickListener);
+                    break;
+                default:
+                    LogUtil.e(TAG, "file type is illegal");
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            LogUtil.e(TAG, "insert image fail");
         }
     }
 
     public void insertBlockImage(@DrawableRes int resourceId, @NonNull BlockImageSpanVm blockImageSpanVm,
                                  OnImageClickListener onImageClickListener) {
         try {
-            Drawable drawable = AppCompatResources.getDrawable(mContext, resourceId);
+            Drawable drawable = AppCompatResources.getDrawable(mActivity, resourceId);
             insertBlockImage(drawable, blockImageSpanVm, onImageClickListener);
         } catch (Exception e) {
-            Log.e(TAG, "Unable to find resource: " + resourceId);
+            LogUtil.e(TAG, "Unable to find resource: " + resourceId);
         }
     }
 
     public void insertBlockImage(Bitmap bitmap, @NonNull BlockImageSpanVm blockImageSpanVm,
                                  OnImageClickListener onImageClickListener) {
-        Drawable drawable = mContext != null
-                ? new BitmapDrawable(mContext.getResources(), bitmap)
+        Drawable drawable = mActivity != null
+                ? new BitmapDrawable(mActivity.getResources(), bitmap)
                 : new BitmapDrawable(bitmap);
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
-        drawable.setBounds(0, 0, width > 0 ? width : 0, height > 0 ? height : 0);
+        drawable.setBounds(0, 0, Math.max(width, 0), Math.max(height, 0));
         insertBlockImage(drawable, blockImageSpanVm, onImageClickListener);
     }
 
@@ -512,26 +501,26 @@ public class RichEditText extends LineHeightEditText {
         Editable editable = getEditableText();
         editable.delete(selectionStart, selectionEnd);
         selectionStart = getSelectionStart();
-        mRichUtils.insertStringIntoEditText(ClipboardUtil.getInstance(mContext).getClipboardText(), selectionStart);
+        mRichUtils.insertStringIntoEditText(ClipboardUtil.getInstance(mActivity).getClipboardText(), selectionStart);
     }
 
     @Override
     public boolean onTextContextMenuItem(int id) {
         switch (id) {
             case android.R.id.cut:
-                if (mContext instanceof IClipCallback) {
-                    ((IClipCallback) mContext).onCut();
+                if (mActivity instanceof IClipCallback) {
+                    ((IClipCallback) mActivity).onCut();
                 }
                 break;
             case android.R.id.copy:
-                Log.d(TAG, "getSelectionStart: " + getSelectionStart() + ", getSelectionEnd: " + getSelectionEnd());
-                if (mContext instanceof IClipCallback) {
-                    ((IClipCallback) mContext).onCopy();
+                LogUtil.d(TAG, "getSelectionStart: " + getSelectionStart() + ", getSelectionEnd: " + getSelectionEnd());
+                if (mActivity instanceof IClipCallback) {
+                    ((IClipCallback) mActivity).onCopy();
                 }
                 break;
             case android.R.id.paste:
-                if (mContext instanceof IClipCallback) {
-                    ((IClipCallback) mContext).onPaste();
+                if (mActivity instanceof IClipCallback) {
+                    ((IClipCallback) mActivity).onPaste();
                 }
 
                 handlePaste();
@@ -592,4 +581,15 @@ public class RichEditText extends LineHeightEditText {
     public void setHeadlineTextSize(int headlineTextSize) {
         this.gHeadlineTextSize = headlineTextSize;
     }
+
+    public void setUndoRedoEnable(boolean enableUndoRedo) {
+        if (enableUndoRedo) {
+            undoRedoHelper = new UndoRedoHelper(this);
+        }
+    }
+
+    public boolean isUndoRedoEnable() {
+        return undoRedoHelper != null;
+    }
+
 }

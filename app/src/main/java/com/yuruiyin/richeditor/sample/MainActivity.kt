@@ -3,13 +3,13 @@ package com.yuruiyin.richeditor.sample
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.yuruiyin.richeditor.enumtype.FileTypeEnum
@@ -20,8 +20,10 @@ import com.yuruiyin.richeditor.model.RichEditorBlock
 import com.yuruiyin.richeditor.model.StyleBtnVm
 import com.yuruiyin.richeditor.sample.enumtype.BlockImageSpanType
 import com.yuruiyin.richeditor.sample.model.*
+import com.yuruiyin.richeditor.sample.utils.DeviceUtil
 import com.yuruiyin.richeditor.sample.utils.JsonUtil
 import com.yuruiyin.richeditor.sample.utils.WindowUtil
+import com.yuruiyin.richeditor.utils.BitmapUtil
 import com.yuruiyin.richeditor.utils.FileUtil
 import com.yuruiyin.richeditor.utils.ViewUtil
 import kotlinx.android.synthetic.main.activity_main.*
@@ -31,6 +33,11 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val GET_PHOTO_REQUEST_CODE = 1
         const val TAG = "MainActivity"
+
+        // 测试用
+        const val HUAWEI_IMAGE_PATH = "/storage/emulated/0/Huawei/MagazineUnlock/magazine-unlock-04-2.3.4312-_6DE13B88E5CE3D69DE5469945117A2A6.jpg"
+        const val MUMU_IMAGE_PATH = "/storage/emulated/0/DCIM/challenge/122489.jpg"
+        const val OPPO_IMAGE_PATH = "/storage/emulated/0/Pictures/magazine-unlock-04-2.3.4312-_6DE13B88E5CE3D69DE5469945117A2A6.jpg";
 
         /**
          * 草稿SharePreferences的名字
@@ -77,6 +84,7 @@ class MainActivity : AppCompatActivity() {
 
         registerEvents()
     }
+
 
     /**
      * 粗体
@@ -171,7 +179,7 @@ class MainActivity : AppCompatActivity() {
         richEditText.initStyleButton(styleBtnVm)
     }
 
-    private fun registerEvents() {
+    public fun registerEvents() {
         // 生成json数据，显示到TextView上
         btnCreateJson.setOnClickListener {
             val draftEditorBlockList = convertEditorContent(richEditText.content)
@@ -231,9 +239,29 @@ class MainActivity : AppCompatActivity() {
             handleAddGame()
         }
 
-        ivUndo.setOnClickListener { richEditText.undo() }
+        // 添加同一张图片，用于测试插入多张图片导致的卡顿和OOM问题
+        ivAddSameImageForTest.setOnClickListener {
+            handleAddSameImageForTest()
+        }
 
-        ivRedo.setOnClickListener { richEditText.redo() }
+        ivUndo.setOnClickListener {
+            if (!richEditText.isUndoRedoEnable) {
+                Toast.makeText(this, "未开启undo redo功能", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+            richEditText.undo()
+        }
+
+        ivRedo.setOnClickListener {
+            if (!richEditText.isUndoRedoEnable) {
+                Toast.makeText(this, "未开启undo redo功能", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+            richEditText.redo()
+        }
+
+        // 组件内部默认不开启undo redo功能（由于undo redo功能会占用更大的内存）
+//        richEditText.isUndoRedoEnable = true
     }
 
     private fun convertEditorContent(editorBlockList: List<RichEditorBlock>): List<DraftEditorBlock> {
@@ -372,7 +400,7 @@ class MainActivity : AppCompatActivity() {
 
         val blockImageSpanVm = BlockImageSpanVm(gameVm, gameItemWidth, imageMaxHeight)
         blockImageSpanVm.isFromDraft = isFromDraft
-        richEditText.insertBlockImage(ViewUtil.getBitmap(gameItemView), blockImageSpanVm) { blockImageSpan ->
+        richEditText.insertBlockImage(BitmapUtil.getBitmap(gameItemView), blockImageSpanVm) { blockImageSpan ->
             val retGameVm = blockImageSpan.blockImageSpanVm.spanObject as GameVm
             // 点击游戏item
             Toast.makeText(this, "短按了游戏：${retGameVm.name}", Toast.LENGTH_SHORT).show()
@@ -385,6 +413,25 @@ class MainActivity : AppCompatActivity() {
     private fun handleAddGame() {
         val gameVm = GameVm(1, "一起来捉妖")
         doAddGame(gameVm)
+        Log.d(TAG, "EditText的高度： " + richEditText.height)
+    }
+
+    /**
+     * 添加同一张图片，用于测试插入多张图片导致的卡顿和OOM问题
+     */
+    fun handleAddSameImageForTest() {
+        val realImagePath = if (DeviceUtil.isEmulator(this)) {
+            MUMU_IMAGE_PATH
+        } else {
+            if (android.os.Build.MANUFACTURER == "HUAWEI") {
+                HUAWEI_IMAGE_PATH
+            } else {
+                OPPO_IMAGE_PATH
+            }
+        }
+        val imageVm = ImageVm(realImagePath, "2")
+        doAddBlockImageSpan(realImagePath, imageVm)
+        Log.d(TAG, "EditText的高度： " + richEditText.height)
     }
 
     /**
@@ -400,7 +447,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * 处理插入图片
      */
-    private fun handleAddImage() {
+    fun handleAddImage() {
         val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         startActivityForResult(intent, GET_PHOTO_REQUEST_CODE)
     }
@@ -408,8 +455,8 @@ class MainActivity : AppCompatActivity() {
     private fun doAddBlockImageSpan(
             realImagePath: String, blockImageSpanObtainObject: IBlockImageSpanObtainObject, isFromDraft: Boolean = false
     ) {
-        val blockImageSpanVm = BlockImageSpanVm(blockImageSpanObtainObject) // 不指定宽高，使用图片原始大小（但组件内对最大宽和最大高还是有约束的）
-//        val blockImageSpanVm = BlockImageSpanVm(blockImageSpanObtainObject, imageWidth, imageMaxHeight) // 指定宽高
+//        val blockImageSpanVm = BlockImageSpanVm(blockImageSpanObtainObject) // 不指定宽高，使用图片原始大小（但组件内对最大宽和最大高还是有约束的）
+        val blockImageSpanVm = BlockImageSpanVm(blockImageSpanObtainObject, imageWidth, imageMaxHeight) // 指定宽高
         blockImageSpanVm.isFromDraft = isFromDraft
         richEditText.insertBlockImage(realImagePath, blockImageSpanVm) { blockImageSpan ->
             val spanObtainObject = blockImageSpan.blockImageSpanVm.spanObject
@@ -430,6 +477,7 @@ class MainActivity : AppCompatActivity() {
             // 相册图片返回
             val selectedImageUri = data.data ?: return
             val realImagePath = FileUtil.getFileRealPath(this, selectedImageUri) ?: return
+            Log.d(TAG, "realImagePath: $realImagePath")
             val fileType = FileUtil.getFileType(realImagePath) ?: return
             when (fileType) {
                 FileTypeEnum.STATIC_IMAGE, FileTypeEnum.GIF -> {

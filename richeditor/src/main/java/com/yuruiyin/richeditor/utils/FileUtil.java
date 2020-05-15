@@ -86,7 +86,7 @@ public class FileUtil {
 
     public static String getFileType(File file) {
         if (file == null) {
-            Log.e(TAG, "file is null");
+            LogUtil.e(TAG, "file is null");
             return FileTypeEnum.STATIC_IMAGE;
         }
 
@@ -95,13 +95,13 @@ public class FileUtil {
 
     public static String getFileType(Context context, Uri uri) {
         if (uri == null) {
-            Log.e(TAG, "uri is null");
+            LogUtil.e(TAG, "uri is null");
             return FileTypeEnum.STATIC_IMAGE;
         }
 
         String path = getFileRealPath(context, uri);
         if (TextUtils.isEmpty(path)) {
-            Log.e(TAG, "path is null");
+            LogUtil.e(TAG, "path is null");
             return FileTypeEnum.STATIC_IMAGE;
         }
 

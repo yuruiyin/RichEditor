@@ -1,12 +1,9 @@
 package com.yuruiyin.richeditor.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.yuruiyin.richeditor.enumtype.RichTypeEnum;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

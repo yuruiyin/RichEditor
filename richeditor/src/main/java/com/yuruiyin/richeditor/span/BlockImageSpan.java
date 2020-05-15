@@ -7,8 +7,9 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 
 import com.yuruiyin.richeditor.RichEditText;
 import com.yuruiyin.richeditor.callback.OnImageClickListener;
@@ -23,6 +24,8 @@ import com.yuruiyin.richeditor.model.BlockImageSpanVm;
  */
 public class BlockImageSpan extends CenterImageSpan implements LongClickableSpan {
 
+    private static final String TAG = "BlockImageSpan";
+
     // 手指触摸到图片左侧之后，当成光标移动到左侧，不响应图片点击事件
     private static final int TOUCH_OFFSET_X = 45;
 
@@ -32,6 +35,8 @@ public class BlockImageSpan extends CenterImageSpan implements LongClickableSpan
     private BlockImageSpanVm blockImageSpanVm;
 
     private OnImageClickListener mOnImageClickListener;
+
+    private Drawable mDrawable;
 
     public BlockImageSpan(Context context, int resourceId, @NonNull BlockImageSpanVm blockImageSpanVm) {
         super(context, resourceId);
@@ -80,9 +85,8 @@ public class BlockImageSpan extends CenterImageSpan implements LongClickableSpan
     }
 
     public boolean clicked(int touchX, int touchY) {
-        Drawable drawable = getDrawable();
-        if (drawable != null) {
-            Rect rect = drawable.getBounds();
+        if (mDrawable != null) {
+            Rect rect = mDrawable.getBounds();
             return touchX <= rect.right + x && touchX >= rect.left + x + TOUCH_OFFSET_X
                     && touchY <= rect.bottom + y && touchY >= rect.top + y;
         }
@@ -102,7 +106,11 @@ public class BlockImageSpan extends CenterImageSpan implements LongClickableSpan
             drawable.setBounds(0, 0, maxWidth, (int) (height * scale));
         }
 
-        return drawable;
+        if (mDrawable == null) {
+            mDrawable = drawable;
+        }
+
+        return mDrawable;
     }
 
 }

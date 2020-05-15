@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:id="@+id/vgRoot"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/vgRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity"
-    >
+    tools:context=".MainActivity">
 
     <com.google.android.flexbox.FlexboxLayout
         android:layout_width="match_parent"
@@ -17,66 +15,58 @@
         app:alignItems="flex_start"
         app:flexDirection="row"
         app:flexWrap="wrap"
-        app:justifyContent="flex_start"
-        >
+        app:justifyContent="flex_start">
 
         <ImageView
             android:id="@+id/ivBold"
             android:layout_width="@dimen/style_button_size"
             android:layout_height="@dimen/style_button_size"
             android:padding="7dp"
-            android:src="@mipmap/icon_bold_normal"
-            />
+            android:src="@mipmap/icon_bold_normal" />
 
         <ImageView
             android:id="@+id/ivItalic"
             android:layout_width="@dimen/style_button_size"
             android:layout_height="@dimen/style_button_size"
             android:padding="7dp"
-            android:src="@mipmap/icon_italic_normal"
-            />
+            android:src="@mipmap/icon_italic_normal" />
 
         <ImageView
             android:id="@+id/ivStrikeThrough"
             android:layout_width="@dimen/style_button_size"
             android:layout_height="@dimen/style_button_size"
             android:padding="7dp"
-            android:src="@mipmap/icon_strikethrough_normal"
-            />
+            android:src="@mipmap/icon_strikethrough_normal" />
 
         <ImageView
             android:id="@+id/ivUnderline"
             android:layout_width="@dimen/style_button_size"
             android:layout_height="@dimen/style_button_size"
             android:padding="7dp"
-            android:src="@mipmap/icon_underline_normal"
-            />
+            android:src="@mipmap/icon_underline_normal" />
 
 
         <LinearLayout
             android:id="@+id/vgHeadline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:gravity="center"
-            >
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/ivHeadline"
                 android:layout_width="@dimen/style_button_size"
                 android:layout_height="@dimen/style_button_size"
                 android:padding="7dp"
-                android:src="@mipmap/icon_headline_normal"
-                />
+                android:src="@mipmap/icon_headline_normal" />
 
             <TextView
                 android:id="@+id/tvHeadline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="标题"
-                android:textSize="10dp"
                 android:textColor="@color/headline_normal_text_color"
-                />
+                android:textSize="10dp" />
 
         </LinearLayout>
 
@@ -85,32 +75,51 @@
             android:layout_width="@dimen/style_button_size"
             android:layout_height="@dimen/style_button_size"
             android:padding="7dp"
-            android:src="@mipmap/icon_blockquote_normal"
-            />
+            android:src="@mipmap/icon_blockquote_normal" />
 
         <ImageView
             android:id="@+id/ivAddImage"
             android:layout_width="@dimen/style_button_size"
             android:layout_height="@dimen/style_button_size"
             android:padding="7dp"
-            android:src="@mipmap/icon_picture"
-            />
+            android:src="@mipmap/icon_picture" />
 
         <ImageView
             android:id="@+id/ivAddDivider"
             android:layout_width="@dimen/style_button_size"
             android:layout_height="@dimen/style_button_size"
             android:padding="7dp"
-            android:src="@mipmap/icon_divider_normal"
-            />
+            android:src="@mipmap/icon_divider_normal" />
 
         <ImageView
             android:id="@+id/ivAddGame"
             android:layout_width="@dimen/style_button_size"
             android:layout_height="@dimen/style_button_size"
             android:padding="7dp"
-            android:src="@mipmap/icon_game"
-            />
+            android:src="@mipmap/icon_game" />
+
+        <!-- 测试多ImageSpan可能会导致的OOM问题 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/ivAddSameImageForTest"
+                android:layout_width="@dimen/style_button_size"
+                android:layout_height="@dimen/style_button_size"
+                android:padding="7dp"
+                android:src="@mipmap/icon_picture_test" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="test"
+                android:textColor="@color/headline_normal_text_color"
+                android:textSize="10dp" />
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/btnClearContent"
@@ -120,8 +129,7 @@
             android:padding="5dp"
             android:text="清空"
             android:textColor="#ff000000"
-            android:textSize="15dp"
-            />
+            android:textSize="15dp" />
 
         <Button
             android:id="@+id/btnSaveDraft"
@@ -131,8 +139,7 @@
             android:padding="5dp"
             android:text="保存草稿"
             android:textColor="#ff000000"
-            android:textSize="15dp"
-            />
+            android:textSize="15dp" />
 
         <Button
             android:id="@+id/btnRestoreDraft"
@@ -142,8 +149,7 @@
             android:padding="5dp"
             android:text="恢复草稿"
             android:textColor="#ff000000"
-            android:textSize="15dp"
-            />
+            android:textSize="15dp" />
 
         <Button
             android:id="@+id/btnClearDraft"
@@ -153,8 +159,7 @@
             android:padding="5dp"
             android:text="清空草稿"
             android:textColor="#ff000000"
-            android:textSize="15dp"
-            />
+            android:textSize="15dp" />
 
         <Button
             android:id="@+id/btnCreateJson"
@@ -164,37 +169,32 @@
             android:padding="5dp"
             android:text="生成json"
             android:textColor="#ff000000"
-            android:textSize="15dp"
-            />
+            android:textSize="15dp" />
 
         <ImageView
             android:id="@+id/ivUndo"
             android:layout_width="@dimen/style_button_size"
             android:layout_height="@dimen/style_button_size"
             android:padding="7dp"
-            android:src="@mipmap/icon_undo"
-            />
+            android:src="@mipmap/icon_undo" />
 
         <ImageView
             android:id="@+id/ivRedo"
             android:layout_width="@dimen/style_button_size"
             android:layout_height="@dimen/style_button_size"
             android:padding="7dp"
-            android:src="@mipmap/icon_redo"
-            />
+            android:src="@mipmap/icon_redo" />
 
     </com.google.android.flexbox.FlexboxLayout>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            >
+            android:orientation="vertical">
 
             <EditText
                 android:id="@+id/etTitle"
@@ -206,15 +206,14 @@
                 android:inputType="textMultiLine"
                 android:maxLength="40"
                 android:maxLines="2"
-                android:paddingBottom="16dp"
                 android:paddingLeft="15dp"
-                android:paddingRight="15dp"
                 android:paddingTop="15dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="16dp"
                 android:textColor="#ff000000"
                 android:textColorHint="#ffdddddd"
                 android:textSize="19dp"
-                android:textStyle="bold"
-                />
+                android:textStyle="bold" />
 
             <com.yuruiyin.richeditor.RichEditText
                 android:id="@+id/richEditText"
@@ -228,21 +227,22 @@
                 android:lineSpacingExtra="5dp"
                 android:maxLength="20000"
                 android:minHeight="350dp"
-                android:paddingBottom="70dp"
                 android:paddingLeft="@dimen/editor_padding_left"
-                android:paddingRight="@dimen/editor_padding_right"
                 android:paddingTop="23dp"
+                android:paddingRight="@dimen/editor_padding_right"
+                android:paddingBottom="70dp"
                 android:textColor="#171717"
                 android:textColorHint="#aaaaaa"
-                android:textCursorDrawable="@null"
+                android:cursorVisible="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
                 android:textSize="16dp"
                 app:editor_headline_text_size="20dp"
                 app:editor_image_radius="5dp"
                 app:editor_show_gif_mark="true"
                 app:editor_show_long_image_mark="true"
                 app:editor_show_video_mark="true"
-                app:editor_video_mark_resource_id="@mipmap/editor_video_mark_icon"
-                />
+                app:editor_video_mark_resource_id="@mipmap/editor_video_mark_icon" />
 
             <TextView
                 android:id="@+id/tvContentJson"
@@ -251,8 +251,7 @@
                 android:layout_marginTop="20dp"
                 android:background="@color/base_white"
                 android:padding="15dp"
-                android:text="json数据"
-                />
+                android:text="json数据" />
 
         </LinearLayout>
 

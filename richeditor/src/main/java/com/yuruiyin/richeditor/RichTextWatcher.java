@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.ParcelableSpan;
 import com.hanks.lineheightedittext.TextWatcher;
+import com.yuruiyin.richeditor.config.AppConfig;
 import com.yuruiyin.richeditor.span.BlockImageSpan;
 
 /**
@@ -97,6 +98,11 @@ public class RichTextWatcher implements TextWatcher {
 
     }
 
+    private boolean isInUndo(String preContent, String curContent) {
+        String addContent = curContent.substring(preContent.length());
+        return addContent.equals("\n" + AppConfig.IMAGE_SPAN_PLACEHOLDER);
+    }
+
     @Override
     public void afterTextChanged(Editable s) {
         if (s.toString().length() < beforeEditContentLen) {
@@ -110,8 +116,10 @@ public class RichTextWatcher implements TextWatcher {
 
         int cursorPos = mEditText.getSelectionStart();
         String editContent = s.toString();
+        // 如果是删除imageSpan，然后再执行undo的时候，不要在插入'\n'，否则可能导致死循环
         if (needInsertBreakLinePosAfterImage != -1 &&
-                cursorPos > 0 && editContent.charAt(cursorPos - 1) != '\n') {
+                cursorPos > 0 && editContent.charAt(cursorPos - 1) != '\n'
+                && !isInUndo(lastEditTextContent, editContent)) {
             //在imageSpan后面输入了文字（除了'\n'），则需要换行
             s.insert(needInsertBreakLinePosAfterImage, "\n");
         }
@@ -119,7 +127,7 @@ public class RichTextWatcher implements TextWatcher {
         if (isNeedInsertBreakLineBeforeImage && cursorPos >= 0) {
             // 在ImageSpan前输入回车, 则需要将光标移动到上一个行
             // 在ImageSpan前输入文字（除了'\n'），则需要先换行，在将光标移动到上一行
-            if (editContent.charAt(cursorPos - 1) != '\n') {
+            if (cursorPos > 0 && editContent.charAt(cursorPos - 1) != '\n') {
                 s.insert(cursorPos, "\n");
             }
             mEditText.setSelection(cursorPos);
